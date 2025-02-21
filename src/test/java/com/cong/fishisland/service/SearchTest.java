@@ -6,9 +6,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.common.TestBaseByLogin;
+import com.cong.fishisland.model.vo.hot.HotPostDataVO;
+import com.cong.fishisland.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -20,8 +25,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class SearchTest extends TestBaseByLogin {
@@ -110,6 +117,64 @@ public class SearchTest extends TestBaseByLogin {
                 }
             }
         }
+    }
+
+    @Test
+    void codeFatherSearchTest() throws IOException {
+        String urlCodeFather = "https://api.codefather.cn/api/search/hot";
+        HttpPost request = new HttpPost(urlCodeFather);
+        // 创建请求体（body）
+        String jsonBody = "{\"hiddenContent\": true, \"pageSize\": 20, \"type\": \"all_hot\"}";
+        StringEntity entity = new StringEntity(jsonBody);  // 将 JSON 字符串转换为实体
+
+        // 设置请求体
+        request.setEntity(entity);
+        // 添加常见的请求头
+        request.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+        request.setHeader(HttpHeaders.REFERER, "https://s.weibo.com/top/summary?cate=realtimehot");
+
+        // 添加其他请求头
+        request.setHeader("Access-Control-Allow-Credentials", "true");
+        request.setHeader("Access-Control-Allow-Origin", "https://www.codefather.cn");
+        request.setHeader("Access-Control-Expose-Headers", "*");
+        request.setHeader("Content-Encoding", "gzip");
+        request.setHeader("Content-Type", "application/json");
+        request.setHeader("Date", "Fri, 21 Feb 2025 07:03:51 GMT");
+        request.setHeader("Server", "www.tsycdn.com");
+        request.setHeader("Strict-Transport-Security", "max-age=31536000");
+        request.setHeader("Vary", "Accept-Encoding");
+        request.setHeader("Vary", "Origin,Access-Control-Request-Method,Access-Control-Request-Headers");
+        request.setHeader("X-Cloudbase-Request-Id", "af099400-1c70-4f1b-9e6c-9a67996adce4");
+        request.setHeader("X-Cloudbase-Upstream-Status-Code", "200");
+        request.setHeader("X-Cloudbase-Upstream-Timecost", "133");
+        request.setHeader("X-Cloudbase-Upstream-Type", "Tencent-CBR");
+        request.setHeader("X-Request-Id", "af099400-1c70-4f1b-9e6c-9a67996adce4");
+        request.setHeader("X-Upstream-Status-Code", "200");
+        request.setHeader("X-Upstream-Timecost", "133");
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse response = httpClient.execute(request);
+        String result = EntityUtils.toString(response.getEntity());
+        JSONObject resultJson = (JSONObject) JSON.parse(result);
+        JSONObject data = resultJson.getJSONObject("data");
+        JSONArray records = data.getJSONObject("searchPage").getJSONArray("records");
+        List<HotPostDataVO> dataList = records.stream().map(item -> {
+            JSONObject jsonItem = (JSONObject) item;
+            String title = jsonItem.getString("title");
+            String recommendScore = jsonItem.getString("recommendScore");
+            String id = jsonItem.getString("id");
+            String url = "https://www.codefather.cn/post/" + id;
+            String excerpt = jsonItem.getString("description");
+
+            return HotPostDataVO.builder()
+                    .title(title)
+                    .url(url)
+                    .followerCount(Integer.parseInt(StringUtils.extractNumber(recommendScore)) * 10)
+                    .excerpt(excerpt)
+                    .build();
+        }).collect(Collectors.toList());
+
+        log.info("dataList: {}", dataList);
+
     }
 
 

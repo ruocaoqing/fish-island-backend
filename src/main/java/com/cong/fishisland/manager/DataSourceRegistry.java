@@ -1,5 +1,6 @@
 package com.cong.fishisland.manager;
 
+import com.cong.fishisland.datasource.CodeFatherDataSource;
 import com.cong.fishisland.datasource.DataSource;
 import com.cong.fishisland.datasource.WeiBoDataSource;
 import com.cong.fishisland.datasource.ZhiHuDataSource;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +27,7 @@ public class DataSourceRegistry {
 
     private final ZhiHuDataSource zhiHuDataSource;
     private final WeiBoDataSource weiBoDataSource;
+    private final CodeFatherDataSource codeFatherDataSource;
 
 
     @PostConstruct
@@ -34,6 +35,7 @@ public class DataSourceRegistry {
         typeDataSourceMap = new HashMap() {{
             put(HotDataKeyEnum.ZHI_HU.getValue(), zhiHuDataSource);
             put(HotDataKeyEnum.WEI_BO.getValue(), weiBoDataSource);
+            put(HotDataKeyEnum.CODE_FATHER.getValue(), codeFatherDataSource);
         }};
     }
 
