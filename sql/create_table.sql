@@ -65,3 +65,19 @@ create table if not exists post_favour
     index idx_postId (postId),
     index idx_userId (userId)
 ) comment '帖子收藏';
+
+
+-- 热点表
+create table if not exists hot_post
+(
+    id         bigint auto_increment comment 'id' primary key,
+    name      varchar(256)                       null comment '排行榜名称',
+    typeName      varchar(256)                       null comment ' 热点类型名称',
+    iconUrl    varchar(512)                               null comment '图标地址',
+    hostJson        mediumtext                      null comment '热点数据（json）',
+    sort   int      default 0                 not null comment ' 排序',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除',
+    index idx_postId (sort)
+) comment '热点表' collate = utf8mb4_unicode_ci;
