@@ -1,11 +1,13 @@
-package com.cong.fishisland.service;
+package com.cong.fishisland.datasource;
 
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.cong.fishisland.common.TestBaseByLogin;
+import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.vo.hot.HotPostDataVO;
+import com.cong.fishisland.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,37 +18,24 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.Test;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+/**
+ * 微博热榜数据源
+ *
+ * @author cong
+ * @date 2025/02/21
+ */
 @Slf4j
-public class SearchTest extends TestBaseByLogin {
-    @Test
-    void searchZhiHuData() {
-        String urlZhiHu = "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50&desktop=true";
-
-        String result = HttpRequest.get(urlZhiHu).execute().body();
-        JSONObject resultJson = (JSONObject) JSON.parse(result);
-        JSONArray data = resultJson.getJSONArray("data");
-        data.forEach(item -> {
-            JSONObject jsonItem = (JSONObject) item;
-            JSONObject target = jsonItem.getJSONObject("target");
-            String title = target.getString("title");
-            String url = target.getString("url");
-            String followerCount = target.getString("follower_count");
-            String excerpt = target.getString("excerpt");
-            log.info("\n标题：{}，\n链接：{}，\n热度：{} 万，\n摘要：{}", title, url, followerCount, excerpt);
-
-        });
-
-    }
-
-    @Test
-    void weiboSearchTest() throws IOException {
+@Component
+public class WeiBoDataSource implements DataSource {
+    @Override
+    public HotPost getHotPost() {
         //获取tid
         String tidUrl = "https://passport.weibo.com/visitor/genvisitor";
         Map<String, Object> params = new HashMap<>();
@@ -90,26 +79,41 @@ public class SearchTest extends TestBaseByLogin {
         request.setHeader("Referer", "https://s.weibo.com/top/summary?cate=realtimehot");
         request.setHeader("Cookie", "SUB=" + sub + "; SUBP=" + subp + ";");
 
-        response = httpClient.execute(request);
-        String html = EntityUtils.toString(response.getEntity());
+        List<HotPostDataVO> dataList = new ArrayList<>();
+        try {
+            response = httpClient.execute(request);
+            String html = EntityUtils.toString(response.getEntity());
 
-        Document document = Jsoup.parse(html);
-        Element item = document.getElementsByTag("tbody").first();
-        if (item != null) {
-            Elements items = item.getElementsByTag("tr");
-            for (Element tmp : items) {
-                Element rankEle = tmp.getElementsByTag("td").first();
-                Elements textEle = tmp.select(".td-02").select("a");
-                Elements followerEle = tmp.select(".td-02").select("span");
-                //过滤广告
-                Elements rdEle = tmp.select(".td-02").select("span");
-                if (!Objects.requireNonNull(rankEle).text().isEmpty() && !rdEle.text().isEmpty()) {
-                    log.info("title: {}", textEle.text());
-                    log.info("url: https://s.weibo.com{}", textEle.attr("href"));
-                    log.info("followerCount: {}", followerEle.text());
+            Document document = Jsoup.parse(html);
+            Element item = document.getElementsByTag("tbody").first();
+            if (item != null) {
+                Elements items = item.getElementsByTag("tr");
+                for (Element tmp : items) {
+                    Element rankEle = tmp.getElementsByTag("td").first();
+                    Elements textEle = tmp.select(".td-02").select("a");
+                    Elements followerEle = tmp.select(".td-02").select("span");
+                    //过滤广告
+                    Elements rdEle = tmp.select(".td-02").select("span");
+                    if (!Objects.requireNonNull(rankEle).text().isEmpty() && !rdEle.text().isEmpty()) {
+                        HotPostDataVO dataVO = HotPostDataVO.builder()
+                                .title(textEle.text())
+                                .url("https://s.weibo.com" + textEle.attr("href"))
+                                .followerCount(Integer.valueOf(StringUtils.extractNumber(followerEle.text())))
+                                .build();
+                        dataList.add(dataVO);
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error("获取微博热搜失败", e);
         }
+
+        return HotPost.builder()
+                .name("微博热搜")
+                .iconUrl("https://s.weibo.com/favicon.ico")
+                .hostJson(JSON.toJSONString(dataList))
+                .typeName("微博")
+                .build();
     }
 
 

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.model.entity.hot.HotPost;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
+import com.cong.fishisland.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -34,13 +35,13 @@ public class ZhiHuDataSource implements DataSource {
             String title = target.getString("title");
             String[] parts = target.getString("url").split("/");
             String url = "https://zhihu.com/question/" + parts[parts.length - 1];
-            String followerCount = target.getString("follower_count");
+            String followerCount = jsonItem.getString("detail_text");
             String excerpt = target.getString("excerpt");
 
             return HotPostDataVO.builder()
                     .title(title)
                     .url(url)
-                    .followerCount(Integer.valueOf(followerCount))
+                    .followerCount(Integer.parseInt(StringUtils.extractNumber(followerCount)) * 10000)
                     .excerpt(excerpt)
                     .build();
         }).collect(Collectors.toList());
