@@ -46,7 +46,7 @@ import static com.cong.fishisland.constant.SystemConstants.SALT;
 @RestController
 @RequestMapping("/user")
 @Slf4j
-@Api(tags = "用户相关")
+//@Api(tags = "用户相关")
 public class UserController {
 
     @Resource

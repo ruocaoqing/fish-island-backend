@@ -32,19 +32,17 @@ public class ZhiHuDataSource implements DataSource {
             JSONObject jsonItem = (JSONObject) item;
             JSONObject target = jsonItem.getJSONObject("target");
             String title = target.getString("title");
-            String url = target.getString("url");
+            String[] parts = target.getString("url").split("/");
+            String url = "https://zhihu.com/question/" + parts[parts.length - 1];
             String followerCount = target.getString("follower_count");
             String excerpt = target.getString("excerpt");
-            HotPostDataVO hotPostDataVO = HotPostDataVO.builder()
+
+            return HotPostDataVO.builder()
                     .title(title)
                     .url(url)
                     .followerCount(Integer.valueOf(followerCount))
                     .excerpt(excerpt)
                     .build();
-
-            log.info("\n标题：{}，\n链接：{}，\n热度：{} 万，\n摘要：{}", title, url, followerCount, excerpt);
-
-            return hotPostDataVO;
         }).collect(Collectors.toList());
         return HotPost.builder()
                 .name("知乎热榜")

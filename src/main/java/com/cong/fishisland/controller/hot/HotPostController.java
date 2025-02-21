@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping("/hot")
 @Slf4j
 @RequiredArgsConstructor
-@Api(tags = "热榜数据")
+//@Api(tags = "热榜数据")
 public class HotPostController {
 
     private final HotPostService hotPostService;
@@ -29,7 +29,7 @@ public class HotPostController {
      */
     @PostMapping("/list")
     @ApiOperation(value = "获取列表（封装类）")
-    public BaseResponse<List<HotPostVO>> listPostVoByPage() {
+    public BaseResponse<List<HotPostVO>> getHotPostList() {
         return ResultUtils.success(hotPostService.getHotPostList());
     }
 
