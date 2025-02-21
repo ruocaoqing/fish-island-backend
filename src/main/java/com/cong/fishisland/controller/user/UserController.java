@@ -1,4 +1,4 @@
-package com.cong.fishisland.controller;
+package com.cong.fishisland.controller.user;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

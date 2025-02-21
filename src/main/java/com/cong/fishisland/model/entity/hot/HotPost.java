@@ -37,6 +37,12 @@ public class HotPost {
     private String typeName;
 
     /**
+     *  热点类型
+     */
+    @TableField(value = "type")
+    private String type;
+
+    /**
      * 图标地址
      */
     @TableField(value = "iconUrl")

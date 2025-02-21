@@ -1,4 +1,4 @@
-package com.cong.fishisland.controller;
+package com.cong.fishisland.controller.post;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cong.fishisland.common.BaseResponse;

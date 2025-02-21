@@ -1,6 +1,7 @@
 package com.cong.fishisland.job.once;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.cong.fishisland.manager.DataSourceRegistry;
 import com.cong.fishisland.model.entity.hot.HotPost;
 import com.cong.fishisland.model.enums.HotDataKeyEnum;
@@ -11,8 +12,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 全量更新热榜数据
@@ -31,9 +30,17 @@ public class FullSyncHotPostToMYSQL implements CommandLineRunner {
         log.info("开始更新热榜数据...");
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        List<HotPost> hotPostList = HotDataKeyEnum.getValues().stream().map(key -> dataSourceRegistry.getDataSourceByType(key).getHotPost()).collect(Collectors.toList());
-        // 保存到数据库
-        hotPostService.saveBatch(hotPostList);
+        HotDataKeyEnum.getValues().forEach(key -> {
+            HotPost hotPost = dataSourceRegistry.getDataSourceByType(key).getHotPost();
+            hotPost.setType(key);
+            LambdaQueryWrapper<HotPost> hotPostLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            hotPostLambdaQueryWrapper.eq(HotPost::getType, key);
+            HotPost oldHotPost = hotPostService.getOne(hotPostLambdaQueryWrapper);
+            if (oldHotPost != null) {
+                hotPost.setId(oldHotPost.getId());
+            }
+            hotPostService.saveOrUpdate(hotPost);
+        });
         stopWatch.stop();
         long totalTimeMillis = stopWatch.getTotalTimeMillis();
         log.info("更新热榜数据完成，耗时：{}ms", totalTimeMillis);

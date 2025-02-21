@@ -1,4 +1,4 @@
-package com.cong.fishisland.controller;
+package com.cong.fishisland.controller.user;
 
 
 import com.cong.fishisland.config.GitHubConfig;

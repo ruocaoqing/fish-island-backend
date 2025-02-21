@@ -1,4 +1,4 @@
-package com.cong.fishisland.controller;
+package com.cong.fishisland.controller.post;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.hutool.json.JSONUtil;

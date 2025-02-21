@@ -7,6 +7,7 @@
     <resultMap id="BaseResultMap" type="com.cong.fishisland.model.entity.hot.HotPost">
             <id property="id" column="id" />
             <result property="name" column="name" />
+            <result property="type" column="type" />
             <result property="typeName" column="typeName" />
             <result property="iconUrl" column="iconUrl" />
             <result property="hostJson" column="hostJson" />
@@ -17,7 +18,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,name,typeName,iconUrl,hostJson,sort,
+        id,name,type,typeName,iconUrl,hostJson,sort,
         createTime,updateTime,isDelete
     </sql>
 </mapper>

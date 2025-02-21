@@ -68,10 +68,12 @@ create table if not exists post_favour
 
 
 -- 热点表
+drop table  hot_post;
 create table if not exists hot_post
 (
     id         bigint auto_increment comment 'id' primary key,
     name      varchar(256)                       null comment '排行榜名称',
+    type      varchar(256)                       null comment ' 热点类型',
     typeName      varchar(256)                       null comment ' 热点类型名称',
     iconUrl    varchar(512)                               null comment '图标地址',
     hostJson        mediumtext                      null comment '热点数据（json）',

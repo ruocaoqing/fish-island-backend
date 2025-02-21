@@ -2,6 +2,9 @@ package com.cong.fishisland.service;
 
 import com.cong.fishisland.model.entity.hot.HotPost;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.cong.fishisland.model.vo.hot.HotPostVO;
+
+import java.util.List;
 
 /**
 * @author cong
@@ -10,4 +13,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface HotPostService extends IService<HotPost> {
 
+    /**
+     * 获取热门帖子列表
+     *
+     * @return {@link List }<{@link HotPostVO }>
+     */
+    List<HotPostVO> getHotPostList();
 }
