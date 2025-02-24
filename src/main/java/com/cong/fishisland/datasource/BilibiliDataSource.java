@@ -54,8 +54,9 @@ public class BilibiliDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("B站热门")
-                .iconUrl("https://www.bilibili.com/favicon.ico")  // 修正图标地址
-                .hostJson(JSON.toJSONString(dataList))
+                .iconUrl("https://www.bilibili.com/favicon.ico")
+                //按 followerCount 降序排序
+                .hostJson(JSON.toJSONString(dataList.stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())))
                 .typeName("bilibili")
                 .build();
     }
