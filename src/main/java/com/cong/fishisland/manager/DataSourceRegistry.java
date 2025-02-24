@@ -25,7 +25,8 @@ public class DataSourceRegistry {
     private final ZhiHuDataSource zhiHuDataSource;
     private final WeiBoDataSource weiBoDataSource;
     private final CodeFatherDataSource codeFatherDataSource;
-    private  final BilibiliDataSource bilibiliDataSource;
+    private final BiliBiliDataSource bilibiliDataSource;
+    private final HuPuDataSource huPuDataSource;
 
 
     @PostConstruct
@@ -35,6 +36,7 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.WEI_BO.getValue(), weiBoDataSource);
             put(HotDataKeyEnum.CODE_FATHER.getValue(), codeFatherDataSource);
             put(HotDataKeyEnum.BILI_BILI.getValue(), bilibiliDataSource);
+            put(HotDataKeyEnum.HU_PU.getValue(), huPuDataSource);
         }};
     }
 

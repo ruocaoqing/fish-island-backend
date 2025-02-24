@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * BiliBili 数据源
+ * 哔哩哔哩数据源
  *
  * @author shing
  */
 @Slf4j
 @Component
-public class BilibiliDataSource implements DataSource {
+public class BiliBiliDataSource implements DataSource {
 
     @Override
     public HotPost getHotPost() {
@@ -57,7 +57,7 @@ public class BilibiliDataSource implements DataSource {
                 .iconUrl("https://www.bilibili.com/favicon.ico")
                 //按 followerCount 降序排序
                 .hostJson(JSON.toJSONString(dataList.stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())))
-                .typeName("bilibili")
+                .typeName("哔哩哔哩")
                 .build();
     }
 
