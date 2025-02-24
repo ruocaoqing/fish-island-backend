@@ -61,7 +61,7 @@ public class CodeFatherDataSource implements DataSource {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         List<HotPostDataVO> dataList = new ArrayList<>();
         try {
-            StringEntity entity = new StringEntity(jsonBody);  // 将 JSON 字符串转换为实体
+            StringEntity entity = new StringEntity(jsonBody);
 
             // 设置请求体
             request.setEntity(entity);
