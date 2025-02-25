@@ -80,7 +80,7 @@ public class HuPuStreetDataSource implements DataSource {
      */
     private HotPostDataVO extractPostData(Element listItem) {
         try {
-            String postUrl = HUPU_URL + listItem.select("a").attr("href");
+            String postUrl = listItem.select("a").attr("href");
             // 只有当 postUrl 为相对路径且有效时，才进行拼接并处理
             if (postUrl.trim().isEmpty() || postUrl.equals(hupuStreetURL)) {
                 return null;
