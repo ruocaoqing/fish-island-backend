@@ -75,7 +75,7 @@ public class CodeFatherDataSource implements DataSource {
                 String content = jsonItem.getString("content");
                 String recommendScore = jsonItem.getString("recommendScore");
                 String id = jsonItem.getString("id");
-                String url = "https://www.codefather.cn/post/" + id;
+                String url = "https://www.codefather.cn/" + (StrUtil.isBlank(title) ? "essay" : "post") + "/" + id;
                 String excerpt = jsonItem.getString("description");
                 HotPostDataVO dataVO = HotPostDataVO.builder()
                         .title(StrUtil.isBlank(title) ? content.substring(0, 20) : title)
