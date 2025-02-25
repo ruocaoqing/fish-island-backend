@@ -32,7 +32,7 @@ public class DataSourceRegistry {
 
     @PostConstruct
     public void doInit() {
-        typeDataSourceMap = new HashMap() {{
+        typeDataSourceMap = new HashMap<String, DataSource>() {{
             put(HotDataKeyEnum.ZHI_HU.getValue(), zhiHuDataSource);
             put(HotDataKeyEnum.WEI_BO.getValue(), weiBoDataSource);
             put(HotDataKeyEnum.CODE_FATHER.getValue(), codeFatherDataSource);

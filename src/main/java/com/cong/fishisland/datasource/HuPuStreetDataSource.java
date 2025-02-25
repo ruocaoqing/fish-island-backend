@@ -80,7 +80,7 @@ public class HuPuStreetDataSource implements DataSource {
      */
     private HotPostDataVO extractPostData(Element listItem) {
         try {
-            String postUrl = HUPU_URL + listItem.select("a").attr("href");
+            String postUrl = listItem.select("a").attr("href");
             // 只有当 postUrl 为相对路径且有效时，才进行拼接并处理
             if (postUrl.trim().isEmpty() || postUrl.equals(hupuStreetURL)) {
                 return null;
@@ -100,7 +100,7 @@ public class HuPuStreetDataSource implements DataSource {
                     .build();
         } catch (Exception e) {
             log.error("解析帖子数据失败", e);
-            return null;  // 如果解析失败，则忽略该帖子
+            return null;
         }
     }
 
@@ -120,8 +120,8 @@ public class HuPuStreetDataSource implements DataSource {
             // 转换为整数并乘以 1000
             return Integer.parseInt(numericHotStr) * 1000;
         } catch (NumberFormatException e) {
-            log.error("解析热度数据失败: " + hotStr, e);
-            return 0;  // 如果解析失败，返回 0
+            log.error("解析热度数据失败: {}", hotStr, e);
+            return 0;
         }
     }
 }
