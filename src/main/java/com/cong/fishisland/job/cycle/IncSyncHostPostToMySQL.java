@@ -18,7 +18,6 @@ import java.util.Date;
  * 自动同步热榜数据
  * # @author <a href="https://github.com/lhccong">程序员聪</a>
  */
-// todo 取消注释开启任务
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -28,9 +27,9 @@ public class IncSyncHostPostToMySQL {
     private final HotPostService hotPostService;
 
     /**
-     * 每半天执行一次
+     * 每半小时执行一次
      */
-    @Scheduled(fixedRate = 43_200_000)
+    @Scheduled(fixedRate = 1_800_000)
     public void run() {
         log.info("开始更新热榜数据...");
         StopWatch stopWatch = new StopWatch();
