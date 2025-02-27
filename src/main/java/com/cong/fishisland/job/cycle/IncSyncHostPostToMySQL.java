@@ -45,6 +45,7 @@ public class IncSyncHostPostToMySQL {
             }
             hotPost.setUpdateTime(new Date());
             hotPostService.saveOrUpdate(hotPost);
+            log.info("加载===========>【{}】热榜数据完成", hotPost.getTypeName());
         });
         stopWatch.stop();
         long totalTimeMillis = stopWatch.getTotalTimeMillis();

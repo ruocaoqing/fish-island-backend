@@ -44,10 +44,9 @@ public class WeiBoDataSource implements DataSource {
         String quStr = str.substring(str.indexOf("(") + 1, str.indexOf(")"));
         String tid = "";
         if (!quStr.isEmpty()) {
-            JSONObject result = JSONObject.parseObject(quStr);
+            JSONObject result = JSON.parseObject(quStr);
             if (result.getIntValue("retcode") == 20000000) {
                 tid = result.getJSONObject("data").getString("tid");
-                System.out.println("tid:" + tid);
             }
         }
 
@@ -65,7 +64,7 @@ public class WeiBoDataSource implements DataSource {
         String sub = "";
         String subp = "";
         if (!resultStr.isEmpty()) {
-            JSONObject result = JSONObject.parseObject(resultStr);
+            JSONObject result = JSON.parseObject(resultStr);
             if (result.getIntValue("retcode") == 20000000) {
                 sub = result.getJSONObject("data").getString("sub");
                 subp = result.getJSONObject("data").getString("subp");

@@ -2,7 +2,6 @@ package com.cong.fishisland.controller.user;
 
 
 import com.cong.fishisland.config.GitHubConfig;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhyd.oauth.request.AuthRequest;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +23,7 @@ public class RestAuthController {
     @ApiOperation(value = "获取GitHub授权地址重定向")
     public void renderAuth(HttpServletResponse response) throws IOException {
         AuthRequest authRequest = gitHubConfig.getAuthRequest();
-        response.sendRedirect(authRequest.authorize("wegoGithub"));
+        response.sendRedirect(authRequest.authorize("fishGithub"));
     }
 
 }

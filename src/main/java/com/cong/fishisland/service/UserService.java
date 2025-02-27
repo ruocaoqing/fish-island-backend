@@ -38,6 +38,14 @@ public interface UserService extends IService<User> {
     LoginUserVO userLogin(String userAccount, String userPassword);
 
     /**
+     * 获取当前登录用户根据token
+     *
+     * @param token 令 牌
+     * @return {@link User}
+     */
+    User getLoginUser(String token);
+
+    /**
      * 获取当前登录用户
      *
      * @return {@link User}

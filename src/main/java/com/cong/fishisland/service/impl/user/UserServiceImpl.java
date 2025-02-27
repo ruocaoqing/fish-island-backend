@@ -5,6 +5,7 @@ import static com.cong.fishisland.constant.SystemConstants.SALT;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -25,6 +26,8 @@ import com.cong.fishisland.utils.SqlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -65,25 +68,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!userPassword.equals(checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
         }
-        synchronized (userAccount.intern()) {
-            // 账户不能重复
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("userAccount", userAccount);
-            long count = this.baseMapper.selectCount(queryWrapper);
-            if (count > 0) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
+        Map<String, Object> lockMap = new ConcurrentHashMap<>();
+
+        Object lock = lockMap.computeIfAbsent(userAccount, key -> new Object());
+
+        synchronized (lock) {
+            try {
+                // 账户不能重复
+                QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("userAccount", userAccount);
+                long count = this.baseMapper.selectCount(queryWrapper);
+                if (count > 0) {
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
+                }
+                // 2. 加密
+                String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+                // 3. 插入数据
+                User user = new User();
+                user.setUserAccount(userAccount);
+                user.setUserPassword(encryptPassword);
+                boolean saveResult = this.save(user);
+                if (!saveResult) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
+                }
+                return user.getId();
+            } finally {
+                // 防止内存泄漏
+                lockMap.remove(userAccount);
             }
-            // 2. 加密
-            String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
-            // 3. 插入数据
-            User user = new User();
-            user.setUserAccount(userAccount);
-            user.setUserPassword(encryptPassword);
-            boolean saveResult = this.save(user);
-            if (!saveResult) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
-            }
-            return user.getId();
         }
     }
 
@@ -116,6 +128,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         StpUtil.login(user.getId());
         StpUtil.getTokenSession().set(SystemConstants.USER_LOGIN_STATE, user);
         return this.getTokenLoginUserVO(user);
+    }
+
+    @Override
+    public User getLoginUser(String token) {
+        if (CharSequenceUtil.isEmpty(token)) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+
+        // 先判断是否已登录
+        Object userObj = StpUtil.getTokenSessionByToken(token).get(SystemConstants.USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        // 从数据库查询（追求性能的话可以注释，直接走缓存）
+        long userId = currentUser.getId();
+        currentUser = this.getById(userId);
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return currentUser;
     }
 
     public TokenLoginUserVo getTokenLoginUserVO(User user) {
@@ -266,7 +296,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 获取用户信息
         AuthUser authUser = (AuthUser) response.getData();
         if (authUser == null) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Github 登录失败，获取用户信息失败");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Github 登录失败，获取用户信息失败");
         }
         //判断用户是否存在
         String userAccount = authUser.getUsername();
@@ -277,13 +307,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             saveGithubUser(userAccount, authUser);
         }
         //2、用户存在，则登录
-        return this.userLogin(userAccount, authUser.getUuid()+authUser.getUsername());
+        return this.userLogin(userAccount, authUser.getUuid() + authUser.getUsername());
     }
 
     private void saveGithubUser(String userAccount, AuthUser authUser) {
         User user;
         user = new User();
-        String defaultPassword = authUser.getUuid()+authUser.getUsername();
+        String defaultPassword = authUser.getUuid() + authUser.getUsername();
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + defaultPassword).getBytes());
         user.setUserPassword(encryptPassword);
         user.setUserAccount(userAccount);
