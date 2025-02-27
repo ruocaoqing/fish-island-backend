@@ -30,6 +30,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -185,17 +187,55 @@ public class WebSocketServiceImpl implements WebSocketService {
         switch (messageTypeEnum) {
             case CREATE_CHESS_ROOM:
                 //创建棋局房间
-                //自动生成房间号
-                String roomId = String.valueOf(System.currentTimeMillis());
-                CHESS_ROOM_MAP.putIfAbsent(roomId, new CopyOnWriteArrayList<>());
-                CHESS_ROOM_MAP.get(roomId).add(channel);
-                //返回房间号
-                WSBaseResp<Object> createResp = WSBaseResp.builder().type(MessageTypeEnum.CREATE_CHESS_ROOM.getType()).data(roomId).build();
-                sendMsg(channel, createResp);
+                createRoom(channel);
+                break;
+            case JOIN_ROOM:
+                //加入棋局房间
+                joinRoom(chatMessageVo, channel, loginUserId);
                 break;
             default:
                 break;
         }
+    }
+
+    private void createRoom(Channel channel) {
+        //自动生成房间号
+        String roomId = String.valueOf(System.currentTimeMillis());
+        CHESS_ROOM_MAP.putIfAbsent(roomId, new CopyOnWriteArrayList<>());
+        CHESS_ROOM_MAP.get(roomId).add(channel);
+        //返回房间号
+        WSBaseResp<Object> createResp = WSBaseResp.builder().type(MessageTypeEnum.CREATE_CHESS_ROOM.getType()).data(roomId).build();
+        sendMsg(channel, createResp);
+    }
+
+    private void joinRoom(ChatMessageVo chatMessageVo, Channel channel, long loginUserId) {
+        String joinRoomId = chatMessageVo.getContent();
+        if (!CHESS_ROOM_MAP.containsKey(joinRoomId)) {
+            WSBaseResp<Object> errorResp = WSBaseResp.builder().type(MessageTypeEnum.ERROR.getType()).data("房间不存在").build();
+            sendMsg(channel, errorResp);
+            return;
+        }
+        CopyOnWriteArrayList<Channel> channels = CHESS_ROOM_MAP.get(joinRoomId);
+        CHESS_ROOM_MAP.remove(joinRoomId);
+        //开始进行的房间
+        CHESS_ROOM_PLAYER_MAP.put(joinRoomId, channels);
+        //房主
+        Channel roomOwner = channels.get(0);
+        //把当前登录用户传给对方
+        Map<String, Object> data = new HashMap<>();
+        data.put("roomId", joinRoomId);
+        data.put("playerId", loginUserId);
+        data.put("yourColor", "black");
+        data.put("opponentColor", "white");
+        sendMsg(roomOwner, WSBaseResp.builder().type(MessageTypeEnum.JOIN_SUCCESS.getType()).data(data).build());
+
+        //把获取房主传给当前登录用户
+        WSChannelExtraDTO wsChannelExtraDTO = ONLINE_WS_MAP.get(channel);
+        data.put("playerId", wsChannelExtraDTO.getUid());
+        data.put("yourColor", "white");
+        data.put("opponentColor", "black");
+
+        sendMsg(channel, WSBaseResp.builder().type(MessageTypeEnum.JOIN_SUCCESS.getType()).data(data).build());
     }
 
 
