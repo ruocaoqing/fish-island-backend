@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 public enum WSReqTypeEnum {
     LOGIN(1, "请求登录"),
-    CHAT(2, "发送消息"),
+    MESSAGE(2, "发送消息"),
     AUTHORIZE(3, "登录认证"),
     HEARTBEAT(4, "心跳包"),
     ;

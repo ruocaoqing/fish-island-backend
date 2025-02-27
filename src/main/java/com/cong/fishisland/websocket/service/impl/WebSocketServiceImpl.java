@@ -10,6 +10,7 @@ import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
 import com.cong.fishisland.model.dto.ws.WSChannelExtraDTO;
 import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.enums.MessageTypeEnum;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
 import com.cong.fishisland.model.ws.request.WSBaseReq;
 import com.cong.fishisland.model.ws.response.WSBaseResp;
@@ -32,7 +33,6 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 
 
 /**
@@ -65,19 +65,34 @@ public class WebSocketServiceImpl implements WebSocketService {
      */
     private static final ConcurrentHashMap<Long, CopyOnWriteArrayList<Channel>> ONLINE_UID_MAP = new ConcurrentHashMap<>();
 
+    /**
+     * 所有单人在线的棋局和对应的socket
+     */
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Channel>> CHESS_ROOM_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 所有双人加入棋局和对应的socket
+     */
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Channel>> CHESS_ROOM_PLAYER_MAP = new ConcurrentHashMap<>();
 
     @Override
     public void handleLoginReq(Channel channel) {
-        String token = NettyUtil.getAttr(channel, NettyUtil.TOKEN);
-        //更新上线列表
-        online(channel, Long.valueOf(StpUtil.getLoginIdByToken(token).toString()));
-        User loginUser = userService.getLoginUser(token);
-        //发送用户上线事件
-        boolean online = userCache.isOnline(loginUser.getId());
-        if (!online) {
-            loginUser.setUpdateTime(new Date());
-            applicationEventPublisher.publishEvent(new UserOnlineEvent(this, loginUser));
+        try {
+            String token = NettyUtil.getAttr(channel, NettyUtil.TOKEN);
+            //更新上线列表
+            online(channel, Long.valueOf(StpUtil.getLoginIdByToken(token).toString()));
+            User loginUser = userService.getLoginUser(token);
+            //发送用户上线事件
+            boolean online = userCache.isOnline(loginUser.getId());
+            if (!online) {
+                loginUser.setUpdateTime(new Date());
+                applicationEventPublisher.publishEvent(new UserOnlineEvent(this, loginUser));
+            }
+        } catch (Exception e) {
+            log.error("websocket登录失败", e);
+            channel.close();
         }
+
     }
 
     /**
@@ -137,8 +152,6 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     @Override
     public void sendMessage(Channel channel, WSBaseReq req) {
-        // 异常返回
-        WSBaseResp<Object> errorResp = WSBaseResp.builder().type(1).data(ErrorCode.FORBIDDEN_ERROR.getMessage()).build();
         // 发送数据
         String content = req.getData();
         ChatMessageVo chatMessageVo = JSONUtil.toBean(content, ChatMessageVo.class);
@@ -146,11 +159,14 @@ public class WebSocketServiceImpl implements WebSocketService {
         Long uid = req.getUserId();
         String token = NettyUtil.getAttr(channel, NettyUtil.TOKEN);
         if (CharSequenceUtil.isEmpty(token)) {
+            // 异常返回
+            WSBaseResp<Object> errorResp = WSBaseResp.builder().type(MessageTypeEnum.ERROR.getType()).data(ErrorCode.FORBIDDEN_ERROR.getMessage()).build();
             sendMsg(channel, errorResp);
         }
-        sendByType(chatMessageVo, token, uid);
+        sendByType(chatMessageVo, token, uid, channel);
 
     }
+
     @Override
     public void sendMessage(String token, WSBaseReq req) {
         // 发送数据
@@ -158,13 +174,28 @@ public class WebSocketServiceImpl implements WebSocketService {
         ChatMessageVo chatMessageVo = JSONUtil.toBean(content, ChatMessageVo.class);
         // 接收消息 用户id
         Long uid = req.getUserId();
-        sendByType(chatMessageVo, token, uid);
+        sendByType(chatMessageVo, token, uid, null);
 
     }
 
-    private void sendByType(ChatMessageVo chatMessageVo, String token, Long uid) {
+    private void sendByType(ChatMessageVo chatMessageVo, String token, Long uid, Channel channel) {
         long loginUserId = Long.parseLong(StpUtil.getLoginIdByToken(token).toString());
+        MessageTypeEnum messageTypeEnum = MessageTypeEnum.of(chatMessageVo.getType());
         //发送消息
+        switch (messageTypeEnum) {
+            case CREATE_CHESS_ROOM:
+                //创建棋局房间
+                //自动生成房间号
+                String roomId = String.valueOf(System.currentTimeMillis());
+                CHESS_ROOM_MAP.putIfAbsent(roomId, new CopyOnWriteArrayList<>());
+                CHESS_ROOM_MAP.get(roomId).add(channel);
+                //返回房间号
+                WSBaseResp<Object> createResp = WSBaseResp.builder().type(MessageTypeEnum.CREATE_CHESS_ROOM.getType()).data(roomId).build();
+                sendMsg(channel, createResp);
+                break;
+            default:
+                break;
+        }
     }
 
 

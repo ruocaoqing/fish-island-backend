@@ -97,7 +97,7 @@ public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<Tex
                 break;
             case HEARTBEAT:
                 break;
-            case CHAT:
+            case MESSAGE:
                 getService().sendMessage(ctx.channel(),wsBaseReq);
                 break;
             default:

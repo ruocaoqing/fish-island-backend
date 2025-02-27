@@ -13,7 +13,7 @@ public class ChatMessageVo {
     /**
      * 消息类型
      */
-    private Integer type;
+    private String type;
     private String content;
 
 }
