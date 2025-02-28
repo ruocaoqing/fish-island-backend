@@ -20,7 +20,7 @@ public class WSBaseReq {
     /**
      * 接收的用户id
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 每个请求包具体的数据，类型不同结果不同

@@ -6,6 +6,8 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
 import com.cong.fishisland.model.dto.ws.WSChannelExtraDTO;
@@ -158,7 +160,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         String content = req.getData();
         ChatMessageVo chatMessageVo = JSONUtil.toBean(content, ChatMessageVo.class);
         // 接收消息 用户id
-        Long uid = req.getUserId();
+        Long uid = Long.valueOf(req.getUserId());
         String token = NettyUtil.getAttr(channel, NettyUtil.TOKEN);
         if (CharSequenceUtil.isEmpty(token)) {
             // 异常返回
@@ -175,7 +177,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         String content = req.getData();
         ChatMessageVo chatMessageVo = JSONUtil.toBean(content, ChatMessageVo.class);
         // 接收消息 用户id
-        Long uid = req.getUserId();
+        Long uid = Long.valueOf(req.getUserId());
         sendByType(chatMessageVo, token, uid, null);
 
     }
@@ -192,6 +194,18 @@ public class WebSocketServiceImpl implements WebSocketService {
             case JOIN_ROOM:
                 //加入棋局房间
                 joinRoom(chatMessageVo, channel, loginUserId);
+                break;
+            case MOVE_CHESS:
+                //移动棋子
+                CopyOnWriteArrayList<Channel> channels = ONLINE_UID_MAP.get(uid);
+                Map<String, Object> data = new HashMap<>();
+                JSONObject message = JSON.parseObject(chatMessageVo.getContent());
+                data.put("roomId", message.get("roomId"));
+                data.put("position", message.get("position"));
+                data.put("player", message.get("player"));
+                WSBaseResp<Object> wsBaseResp = WSBaseResp.builder()
+                        .type(MessageTypeEnum.MOVE_CHESS.getType()).data(data).build();
+                channels.forEach(item -> threadPoolTaskExecutor.execute(() -> sendMsg(item, wsBaseResp)));
                 break;
             default:
                 break;
@@ -224,18 +238,20 @@ public class WebSocketServiceImpl implements WebSocketService {
         //把当前登录用户传给对方
         Map<String, Object> data = new HashMap<>();
         data.put("roomId", joinRoomId);
-        data.put("playerId", loginUserId);
+        data.put("playerId", String.valueOf(loginUserId));
         data.put("yourColor", "black");
         data.put("opponentColor", "white");
         sendMsg(roomOwner, WSBaseResp.builder().type(MessageTypeEnum.JOIN_SUCCESS.getType()).data(data).build());
 
         //把获取房主传给当前登录用户
-        WSChannelExtraDTO wsChannelExtraDTO = ONLINE_WS_MAP.get(channel);
-        data.put("playerId", wsChannelExtraDTO.getUid());
-        data.put("yourColor", "white");
-        data.put("opponentColor", "black");
+        WSChannelExtraDTO wsChannelExtraDTO = ONLINE_WS_MAP.get(roomOwner);
+        Map<String, Object> data2 = new HashMap<>();
+        data2.put("roomId", joinRoomId);
+        data2.put("playerId", String.valueOf(wsChannelExtraDTO.getUid()));
+        data2.put("yourColor", "white");
+        data2.put("opponentColor", "black");
 
-        sendMsg(channel, WSBaseResp.builder().type(MessageTypeEnum.JOIN_SUCCESS.getType()).data(data).build());
+        sendMsg(channel, WSBaseResp.builder().type(MessageTypeEnum.JOIN_SUCCESS.getType()).data(data2).build());
     }
 
 
