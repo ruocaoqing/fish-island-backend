@@ -1,6 +1,9 @@
 package com.cong.fishisland.controller.user;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import com.anji.captcha.model.common.ResponseModel;
+import com.anji.captcha.model.vo.CaptchaVO;
+import com.anji.captcha.service.CaptchaService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.DeleteRequest;
@@ -24,7 +27,6 @@ import com.cong.fishisland.service.UserService;
 import java.util.List;
 import javax.annotation.Resource;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthCallback;
@@ -51,6 +53,8 @@ public class UserController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private CaptchaService captchaService;
 
     // region 登录相关
 
@@ -69,6 +73,23 @@ public class UserController {
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+            return null;
+        }
+        CaptchaVO captchaVO = new CaptchaVO();
+        captchaVO.setCaptchaVerification(userRegisterRequest.getCaptchaVerification());
+        ResponseModel response = captchaService.verification(captchaVO);
+        if(!response.isSuccess()){
+            //验证码校验失败，返回信息告诉前端
+            //repCode  0000  无异常，代表成功
+            //repCode  9999  服务器内部异常
+            //repCode  0011  参数不能为空
+            //repCode  6110  验证码已失效，请重新获取
+            //repCode  6111  验证失败
+            //repCode  6112  获取验证码失败,请联系管理员
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR,"验证码错误请重试");
+
+        }
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
             return null;
         }
