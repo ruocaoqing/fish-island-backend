@@ -2,6 +2,7 @@ package com.cong.fishisland.datasource;
 
 import com.alibaba.fastjson.JSON;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.CategoryTypeEnum;
 import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,6 +49,7 @@ public class HuPuDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("虎扑热搜")
+                .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://hupu.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList.stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())))

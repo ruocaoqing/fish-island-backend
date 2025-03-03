@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.CategoryTypeEnum;
 import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import com.cong.fishisland.utils.StringUtils;
@@ -47,6 +48,7 @@ public class ZhiHuDataSource implements DataSource {
                     .build();
         }).collect(Collectors.toList());
         return HotPost.builder()
+                .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .name("知乎热榜")
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://www.zhihu.com/favicon.ico")

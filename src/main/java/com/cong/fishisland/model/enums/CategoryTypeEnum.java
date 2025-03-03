@@ -5,30 +5,27 @@ import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.exception.BusinessException;
 import lombok.Getter;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 热榜更新间隔枚举
+ * 热榜分类枚举
  *
  * @author cong
  */
 @Getter
-public enum UpdateIntervalEnum {
-    HALF_HOUR("半小时", BigDecimal.valueOf(0.5)),
-    ONE_HOUR("1小时", BigDecimal.valueOf(1)),
-    TWO_HOUR("3小时", BigDecimal.valueOf(3)),
-    TWELVE_HOUR("12 小时", BigDecimal.valueOf(12)),
-    ONE_DAY("24 小时", BigDecimal.valueOf(24));
+public enum CategoryTypeEnum {
+    GENERAL_DISCUSSION("综合资讯 & 讨论社区", 1),
+    TECH_PROGRAMMING("技术 & 编程", 2),
+    VIDEO_ENTERTAINMENT("视频 & 娱乐", 3);
 
 
     private final String text;
 
-    private final BigDecimal value;
+    private final Integer value;
 
-    UpdateIntervalEnum(String text, BigDecimal value) {
+    CategoryTypeEnum(String text, Integer value) {
         this.text = text;
         this.value = value;
     }
@@ -36,11 +33,11 @@ public enum UpdateIntervalEnum {
     /**
      * 根据 value 获取枚举
      */
-    public static UpdateIntervalEnum getEnumByValue(BigDecimal value) {
+    public static CategoryTypeEnum getEnumByValue(Integer value) {
         if (ObjectUtil.isEmpty(value)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "热榜更新间隔枚举不能为空");
         }
-        for (UpdateIntervalEnum anEnum : UpdateIntervalEnum.values()) {
+        for (CategoryTypeEnum anEnum : CategoryTypeEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }
@@ -51,7 +48,7 @@ public enum UpdateIntervalEnum {
     /**
      * 获取值列表
      */
-    public static List<BigDecimal> getValues() {
+    public static List<Integer> getValues() {
         return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
     }
 

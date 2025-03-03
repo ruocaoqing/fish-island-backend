@@ -4,6 +4,7 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.CategoryTypeEnum;
 import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import com.cong.fishisland.utils.StringUtils;
@@ -105,6 +106,7 @@ public class WeiBoDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("微博热搜")
+                .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://s.weibo.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList))
