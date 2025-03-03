@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 import lombok.Builder;
@@ -59,6 +61,18 @@ public class HotPost {
      */
     @TableField(value = "sort")
     private Integer sort;
+
+    /**
+     * 分类
+     */
+    @TableField(value = "category")
+    private Integer category;
+
+    /**
+     * 更新间隔，以小时为单位
+     */
+    @TableField(value = "updateInterval")
+    private BigDecimal updateInterval;
 
     /**
      * 创建时间

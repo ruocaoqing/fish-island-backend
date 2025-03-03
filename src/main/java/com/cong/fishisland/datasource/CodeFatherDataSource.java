@@ -1,10 +1,12 @@
 package com.cong.fishisland.datasource;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import com.cong.fishisland.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -75,10 +77,10 @@ public class CodeFatherDataSource implements DataSource {
                 String content = jsonItem.getString("content");
                 String recommendScore = jsonItem.getString("recommendScore");
                 String id = jsonItem.getString("id");
-                String url = "https://www.codefather.cn/" + (StrUtil.isBlank(title) ? "essay" : "post") + "/" + id;
+                String url = "https://www.codefather.cn/" + (CharSequenceUtil.isBlank(title) ? "essay" : "post") + "/" + id;
                 String excerpt = jsonItem.getString("description");
                 HotPostDataVO dataVO = HotPostDataVO.builder()
-                        .title(StrUtil.isBlank(title) ? content.substring(0, 20) : title)
+                        .title(CharSequenceUtil.isBlank(title) ? content.substring(0, 20) : title)
                         .url(url)
                         .followerCount(Integer.parseInt(StringUtils.extractNumber(recommendScore)) * 10)
                         .excerpt(excerpt)
@@ -91,6 +93,7 @@ public class CodeFatherDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("编程热门")
+                .updateInterval(UpdateIntervalEnum.ONE_DAY.getValue())
                 .iconUrl("https://www.codefather.cn/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList))
                 .typeName("编程导航")

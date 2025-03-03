@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -54,6 +55,7 @@ public class BiliBiliDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("B站热门")
+                .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://www.bilibili.com/favicon.ico")
                 //按 followerCount 降序排序
                 .hostJson(JSON.toJSONString(dataList.stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())))

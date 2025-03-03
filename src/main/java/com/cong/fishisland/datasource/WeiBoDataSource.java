@@ -1,11 +1,10 @@
 package com.cong.fishisland.datasource;
 
-import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import com.cong.fishisland.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +20,6 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * 微博热榜数据源
@@ -109,6 +105,7 @@ public class WeiBoDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("微博热搜")
+                .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://s.weibo.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList))
                 .typeName("微博")

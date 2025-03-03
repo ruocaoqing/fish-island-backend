@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -35,11 +36,22 @@ public class IncSyncHostPostToMySQL {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         HotDataKeyEnum.getValues().forEach(key -> {
-            HotPost hotPost = dataSourceRegistry.getDataSourceByType(key).getHotPost();
-            hotPost.setType(key);
             LambdaQueryWrapper<HotPost> hotPostLambdaQueryWrapper = new LambdaQueryWrapper<>();
             hotPostLambdaQueryWrapper.eq(HotPost::getType, key);
             HotPost oldHotPost = hotPostService.getOne(hotPostLambdaQueryWrapper);
+            if (oldHotPost != null) {
+                //如果更新时间间隔未到直接跳过
+                //小时制
+                BigDecimal updateInterval = oldHotPost.getUpdateInterval();
+                //转成时间戳
+                long updateIntervalMillis = updateInterval.multiply(new BigDecimal(60 * 60 * 1000)).longValue();
+                if (oldHotPost.getUpdateTime().getTime() + updateIntervalMillis > System.currentTimeMillis()) {
+                    log.info("加载===========>【{}】热榜数据跳过", HotDataKeyEnum.getEnumByValue(key).getText());
+                    return;
+                }
+            }
+            HotPost hotPost = dataSourceRegistry.getDataSourceByType(key).getHotPost();
+            hotPost.setType(key);
             if (oldHotPost != null) {
                 hotPost.setId(oldHotPost.getId());
             }

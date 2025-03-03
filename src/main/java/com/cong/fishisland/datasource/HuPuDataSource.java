@@ -2,6 +2,7 @@ package com.cong.fishisland.datasource;
 
 import com.alibaba.fastjson.JSON;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -48,6 +49,7 @@ public class HuPuDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("虎扑热搜")
+                .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://hupu.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList.stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())))
                 .typeName("虎扑")
