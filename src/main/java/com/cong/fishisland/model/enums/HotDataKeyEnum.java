@@ -20,7 +20,8 @@ public enum HotDataKeyEnum {
     WEI_BO("微博", "WeiBo"),
     CODE_FATHER("编程导航", "CodeFather"),
     BILI_BILI("哔哩哔哩", "BiliBili"),
-    HU_PU_STREET("虎扑步行街", "HuPuStreet");
+    HU_PU_STREET("虎扑步行街", "HuPuStreet"),
+    DOU_YIN("抖音", "DouYin");
 
 
     private final String text;

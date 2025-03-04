@@ -27,7 +27,7 @@ public class DataSourceRegistry {
     private final CodeFatherDataSource codeFatherDataSource;
     private final BiliBiliDataSource bilibiliDataSource;
     private final HuPuStreetDataSource huPuStreetDataSource;
-
+    private final DouYinDataSource douYinDataSource;
 
 
     @PostConstruct
@@ -38,6 +38,7 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.CODE_FATHER.getValue(), codeFatherDataSource);
             put(HotDataKeyEnum.BILI_BILI.getValue(), bilibiliDataSource);
             put(HotDataKeyEnum.HU_PU_STREET.getValue(), huPuStreetDataSource);
+            put(HotDataKeyEnum.DOU_YIN.getValue(), douYinDataSource);
         }};
     }
 
