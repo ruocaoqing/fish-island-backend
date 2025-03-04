@@ -1,7 +1,9 @@
 package com.cong.fishisland.model.vo.hot;
 
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.cong.fishisland.model.entity.hot.HotPost;
+import com.cong.fishisland.model.enums.CategoryTypeEnum;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -27,12 +29,12 @@ public class HotPostVO implements Serializable {
     private String name;
 
     /**
-     *  热点类型
+     * 热点类型
      */
     private String type;
 
     /**
-     *  热点类型名称
+     * 热点类型名称
      */
     private String typeName;
 
@@ -45,6 +47,16 @@ public class HotPostVO implements Serializable {
      * 更新时间
      */
     private Date updateTime;
+
+    /**
+     * 分类
+     */
+    private Integer category;
+
+    /**
+     * 分类名称
+     */
+    private String categoryName;
 
     /**
      * 数据
@@ -63,6 +75,7 @@ public class HotPostVO implements Serializable {
         }
         HotPostVO hotPostVO = new HotPostVO();
         BeanUtils.copyProperties(hotPost, hotPostVO);
+        hotPostVO.setCategoryName(CategoryTypeEnum.getEnumByValue(hotPost.getCategory()).getText());
         hotPostVO.setData(JSONUtil.toList(hotPost.getHostJson(), HotPostDataVO.class));
         return hotPostVO;
     }
