@@ -112,7 +112,6 @@ public class DouYinDataSource implements DataSource {
                     .addParameter("a_bogus", "mysfhqW7EqmjedKtmOG-CaQlJMjMNsSyfBioRYqTtPOYTHzbiSNZgabcnoK1si5wzYBTi937sDtlbEnc%2FsX0ZFHpomkvuhkjBzIAV06ohqqgTehBLrRqCuzitJGbWmiEm5ofJlWUItQcIEK4DZrhUdAyyAkisYJpKNabdrRaY9tD6zT9BrqQuPSdxwtq4E%3D%3D");
 
             fullApiUrl = uriBuilder.build().toString();
-            log.info("构造完整 API URL: {}", fullApiUrl);
         } catch (URISyntaxException e) {
             log.error("URL 构造异常: {}", e.getMessage(), e);
             return buildHotPost(Collections.emptyList());
