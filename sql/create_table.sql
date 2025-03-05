@@ -85,3 +85,14 @@ create table if not exists hot_post
     isDelete   tinyint  default 0                 not null comment '是否删除',
     index idx_postId (sort)
 ) comment '热点表' collate = utf8mb4_unicode_ci;
+
+-- 待办表
+create table if not exists todo
+(
+    id         bigint auto_increment comment 'id' primary key,
+    userId     bigint                             not null comment '用户 id',
+    todoJson      mediumtext                       null comment '待办数据（json）',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除'
+) comment '待办表' collate = utf8mb4_unicode_ci;
