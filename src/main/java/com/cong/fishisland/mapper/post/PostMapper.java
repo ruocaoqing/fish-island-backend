@@ -1,7 +1,7 @@
 package com.cong.fishisland.mapper.post;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.cong.fishisland.model.entity.Post;
+import com.cong.fishisland.model.entity.post.Post;
 import java.util.Date;
 import java.util.List;
 

@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.cong.fishisland.model.entity.Post;
-import com.cong.fishisland.model.entity.PostFavour;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.post.Post;
+import com.cong.fishisland.model.entity.post.PostFavour;
+import com.cong.fishisland.model.entity.user.User;
 
 /**
  * 帖子收藏服务

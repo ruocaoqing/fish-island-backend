@@ -1,6 +1,6 @@
 package com.cong.fishisland.websocket.event;
 
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

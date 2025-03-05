@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cong.fishisland.model.dto.post.PostQueryRequest;
-import com.cong.fishisland.model.entity.Post;
+import com.cong.fishisland.model.entity.post.Post;
 import com.cong.fishisland.model.vo.PostVO;
 
 /**

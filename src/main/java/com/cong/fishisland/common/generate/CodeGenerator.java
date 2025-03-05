@@ -1,7 +1,7 @@
 package com.cong.fishisland.common.generate;
 
-import com.cong.fishisland.model.entity.Post;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.post.Post;
+import com.cong.fishisland.model.entity.user.User;
 
 /**
  * 代码生成器

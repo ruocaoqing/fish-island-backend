@@ -11,7 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
 import com.cong.fishisland.model.dto.ws.WSChannelExtraDTO;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.MessageTypeEnum;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
 import com.cong.fishisland.model.ws.request.WSBaseReq;

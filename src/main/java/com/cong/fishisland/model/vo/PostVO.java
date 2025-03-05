@@ -1,7 +1,7 @@
 package com.cong.fishisland.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.cong.fishisland.model.entity.Post;
+import com.cong.fishisland.model.entity.post.Post;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;

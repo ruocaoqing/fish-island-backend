@@ -9,8 +9,8 @@ import com.cong.fishisland.common.exception.ThrowUtils;
 import com.cong.fishisland.model.dto.post.PostQueryRequest;
 import com.cong.fishisland.model.dto.postfavour.PostFavourAddRequest;
 import com.cong.fishisland.model.dto.postfavour.PostFavourQueryRequest;
-import com.cong.fishisland.model.entity.Post;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.post.Post;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.vo.PostVO;
 import com.cong.fishisland.service.PostFavourService;
 import com.cong.fishisland.service.PostService;
@@ -18,7 +18,6 @@ import com.cong.fishisland.service.UserService;
 
 import javax.annotation.Resource;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

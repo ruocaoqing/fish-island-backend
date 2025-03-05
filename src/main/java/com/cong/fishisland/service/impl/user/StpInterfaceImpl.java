@@ -6,7 +6,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.constant.SystemConstants;
 import com.cong.fishisland.common.exception.BusinessException;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.service.UserService;
 import org.springframework.stereotype.Component;
 

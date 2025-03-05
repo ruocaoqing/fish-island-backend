@@ -1,8 +1,8 @@
 package com.cong.fishisland.service;
 
-import com.cong.fishisland.model.entity.PostThumb;
+import com.cong.fishisland.model.entity.post.PostThumb;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 
 /**
  * 帖子点赞服务

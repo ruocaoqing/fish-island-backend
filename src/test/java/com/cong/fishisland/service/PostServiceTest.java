@@ -2,7 +2,7 @@ package com.cong.fishisland.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cong.fishisland.model.dto.post.PostQueryRequest;
-import com.cong.fishisland.model.entity.Post;
+import com.cong.fishisland.model.entity.post.Post;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

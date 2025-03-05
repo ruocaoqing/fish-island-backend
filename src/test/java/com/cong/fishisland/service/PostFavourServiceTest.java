@@ -2,8 +2,8 @@ package com.cong.fishisland.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.cong.fishisland.model.entity.Post;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.post.Post;
+import com.cong.fishisland.model.entity.user.User;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;

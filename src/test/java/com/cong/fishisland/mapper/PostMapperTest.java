@@ -1,7 +1,7 @@
 package com.cong.fishisland.mapper;
 
 import com.cong.fishisland.mapper.post.PostMapper;
-import com.cong.fishisland.model.entity.Post;
+import com.cong.fishisland.model.entity.post.Post;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Resource;

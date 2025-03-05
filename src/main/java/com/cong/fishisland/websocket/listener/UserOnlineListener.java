@@ -2,7 +2,7 @@ package com.cong.fishisland.websocket.listener;
 
 
 
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.service.UserService;
 import com.cong.fishisland.websocket.cache.UserCache;
 import com.cong.fishisland.websocket.event.UserOnlineEvent;

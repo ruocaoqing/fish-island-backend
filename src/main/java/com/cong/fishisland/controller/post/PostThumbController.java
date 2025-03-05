@@ -5,13 +5,12 @@ import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.ResultUtils;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.model.dto.postthumb.PostThumbAddRequest;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.service.PostThumbService;
 import com.cong.fishisland.service.UserService;
 
 import javax.annotation.Resource;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;

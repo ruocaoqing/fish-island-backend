@@ -16,7 +16,7 @@ import com.cong.fishisland.constant.SystemConstants;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.mapper.user.UserMapper;
 import com.cong.fishisland.model.dto.user.UserQueryRequest;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.UserRoleEnum;
 import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.TokenLoginUserVo;

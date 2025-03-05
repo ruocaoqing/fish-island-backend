@@ -3,7 +3,7 @@ package com.cong.fishisland.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.cong.fishisland.model.dto.user.UserQueryRequest;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
 import com.cong.fishisland.model.vo.user.UserVO;

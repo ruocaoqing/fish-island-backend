@@ -1,6 +1,6 @@
 package com.cong.fishisland.mapper.post;
 
-import com.cong.fishisland.model.entity.PostThumb;
+import com.cong.fishisland.model.entity.post.PostThumb;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

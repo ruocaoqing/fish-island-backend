@@ -14,8 +14,8 @@ import com.cong.fishisland.model.dto.post.PostAddRequest;
 import com.cong.fishisland.model.dto.post.PostEditRequest;
 import com.cong.fishisland.model.dto.post.PostQueryRequest;
 import com.cong.fishisland.model.dto.post.PostUpdateRequest;
-import com.cong.fishisland.model.entity.Post;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.post.Post;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.vo.PostVO;
 import com.cong.fishisland.service.PostService;
 import com.cong.fishisland.service.UserService;
@@ -23,7 +23,6 @@ import com.cong.fishisland.service.UserService;
 import java.util.List;
 import javax.annotation.Resource;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;

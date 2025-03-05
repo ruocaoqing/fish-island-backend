@@ -1,4 +1,4 @@
-package com.cong.fishisland.model.entity;
+package com.cong.fishisland.model.entity.user;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

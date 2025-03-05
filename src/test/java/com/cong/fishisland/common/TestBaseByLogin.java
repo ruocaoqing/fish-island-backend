@@ -1,7 +1,7 @@
 package com.cong.fishisland.common;
 
 import cn.dev33.satoken.stp.StpLogic;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;

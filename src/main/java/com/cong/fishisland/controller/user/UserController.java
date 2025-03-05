@@ -18,7 +18,7 @@ import com.cong.fishisland.model.dto.user.UserQueryRequest;
 import com.cong.fishisland.model.dto.user.UserRegisterRequest;
 import com.cong.fishisland.model.dto.user.UserUpdateMyRequest;
 import com.cong.fishisland.model.dto.user.UserUpdateRequest;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
 import com.cong.fishisland.model.vo.user.UserVO;

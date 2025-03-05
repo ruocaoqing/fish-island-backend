@@ -1,7 +1,7 @@
 package com.cong.fishisland.mapper.user;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 
 /**
  * 用户数据库操作

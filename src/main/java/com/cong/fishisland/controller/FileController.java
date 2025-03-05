@@ -8,13 +8,13 @@ import com.cong.fishisland.constant.FileConstant;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.manager.CosManager;
 import com.cong.fishisland.model.dto.file.UploadFileRequest;
-import com.cong.fishisland.model.entity.User;
+import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.FileUploadBizEnum;
 import com.cong.fishisland.service.UserService;
 import java.io.File;
 import java.util.Arrays;
 import javax.annotation.Resource;
-import io.swagger.annotations.Api;
+
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
