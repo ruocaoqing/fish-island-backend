@@ -21,6 +21,7 @@ public enum HotDataKeyEnum {
     CODE_FATHER("编程导航", "CodeFather"),
     BILI_BILI("哔哩哔哩", "BiliBili"),
     HU_PU_STREET("虎扑步行街", "HuPuStreet"),
+    WY_CLOUD_MUSIC("网易云音乐", "WyCloudMusic"),
     DOU_YIN("抖音", "DouYin");
 
 

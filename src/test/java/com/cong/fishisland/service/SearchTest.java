@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class SearchTest extends TestBaseByLogin {
+class SearchTest extends TestBaseByLogin {
     @Test
     void searchZhiHuData() {
         String urlZhiHu = "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50&desktop=true";
@@ -175,6 +175,29 @@ public class SearchTest extends TestBaseByLogin {
 
         log.info("dataList: {}", dataList);
 
+    }
+    @Test
+    void WYCloudSearchTest() {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse response;
+        HttpGet request = new HttpGet("https://music.163.com/discover/toplist?id=3778678");
+        request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
+
+        try {
+            response = httpClient.execute(request);
+            String html = EntityUtils.toString(response.getEntity());
+            Document document = Jsoup.parse(html);
+            // 找到热门歌单class f-hide
+            Element first = document.getElementsByClass("f-hide").first();
+            first.select("a").forEach(item -> {
+                String title = item.text();
+                String url = item.attr("href");
+                System.out.println(title + "url: "+"https://music.163.com" + url);
+            });
+
+        } catch (Exception e) {
+            log.error("获取微博热搜失败", e);
+        }
     }
 
 

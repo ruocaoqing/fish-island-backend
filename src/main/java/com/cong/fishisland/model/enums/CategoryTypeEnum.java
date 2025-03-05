@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 public enum CategoryTypeEnum {
     GENERAL_DISCUSSION("综合资讯 & 讨论社区", 1),
     TECH_PROGRAMMING("技术 & 编程", 2),
-    VIDEO_ENTERTAINMENT("视频 & 娱乐", 3);
+    VIDEO_ENTERTAINMENT("视频 & 娱乐", 3),
+    MUSIC_HOT("音乐热榜", 4);
 
 
     private final String text;
