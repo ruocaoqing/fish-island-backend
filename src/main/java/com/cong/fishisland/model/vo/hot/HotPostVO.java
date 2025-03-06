@@ -81,7 +81,7 @@ public class HotPostVO implements Serializable {
         hotPostVO.setTypeName(hotPost.getTypeName());
         hotPostVO.setIconUrl(hotPost.getIconUrl());
         hotPostVO.setUpdateTime(hotPost.getUpdateTime());
-        hotPostVO.setCategory(hotPostVO.getCategory());
+        hotPostVO.setCategory(hotPost.getCategory());
         hotPostVO.setCategoryName(CategoryTypeEnum.getEnumByValue(hotPost.getCategory()).getText());
         hotPostVO.setData(JSON.parseArray(hotPost.getHostJson(), HotPostDataVO.class));
         return hotPostVO;
