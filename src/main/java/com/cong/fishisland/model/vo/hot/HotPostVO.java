@@ -1,6 +1,7 @@
 package com.cong.fishisland.model.vo.hot;
 
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.cong.fishisland.model.entity.hot.HotPost;
 import com.cong.fishisland.model.enums.CategoryTypeEnum;
@@ -74,9 +75,15 @@ public class HotPostVO implements Serializable {
             return null;
         }
         HotPostVO hotPostVO = new HotPostVO();
-        BeanUtils.copyProperties(hotPost, hotPostVO);
+        hotPostVO.setId(hotPost.getId());
+        hotPostVO.setName(hotPost.getName());
+        hotPostVO.setType(hotPost.getType());
+        hotPostVO.setTypeName(hotPost.getTypeName());
+        hotPostVO.setIconUrl(hotPost.getIconUrl());
+        hotPostVO.setUpdateTime(hotPost.getUpdateTime());
+        hotPostVO.setCategory(hotPostVO.getCategory());
         hotPostVO.setCategoryName(CategoryTypeEnum.getEnumByValue(hotPost.getCategory()).getText());
-        hotPostVO.setData(JSONUtil.toList(hotPost.getHostJson(), HotPostDataVO.class));
+        hotPostVO.setData(JSON.parseArray(hotPost.getHostJson(), HotPostDataVO.class));
         return hotPostVO;
     }
 
