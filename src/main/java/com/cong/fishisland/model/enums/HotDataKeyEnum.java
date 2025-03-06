@@ -23,7 +23,8 @@ public enum HotDataKeyEnum {
     HU_PU_STREET("虎扑步行街", "HuPuStreet"),
     WY_CLOUD_MUSIC("网易云音乐", "WyCloudMusic"),
     DOU_YIN("抖音", "DouYin"),
-    CS_DN("csdn", "CSDN");
+    CS_DN("csdn", "CSDN"),
+    JUE_JIN("掘金", "JueJin");
 
 
     private final String text;

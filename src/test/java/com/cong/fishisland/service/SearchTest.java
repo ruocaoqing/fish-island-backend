@@ -13,6 +13,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -24,6 +25,8 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +81,56 @@ class SearchTest extends TestBaseByLogin {
             });
 
         }
+    }
+
+    @Test
+    void JurJinSearchTest() throws URISyntaxException {
+
+        String jueJinUrl = "https://api.juejin.cn/content_api/v1/content/article_rank";
+
+        String jueJinPostUrl = "https://juejin.cn/post/";
+
+        URI url = new URIBuilder(jueJinUrl)
+                .addParameter("category_id", "1")
+                .addParameter("type", "hot")
+                .addParameter("aid", "2608")
+                .addParameter("uuid", "7452631964433958441")
+                .addParameter("spider", "0")
+                .build();
+        // 发送 GET 请求并获取响应内容
+        String result = HttpRequest.get(String.valueOf(url)).execute().body();
+        JSONObject resultJson = (JSONObject) JSON.parse(result);
+        JSONArray data = resultJson.getJSONArray("data");
+        // 解析数据
+        List<JSONObject> sortedArticles = data.stream()
+                .map(JSONObject.class::cast)
+                .map(jsonItem -> {
+                    JSONObject content = jsonItem.getJSONObject("content");
+                    JSONObject contentCounter = jsonItem.getJSONObject("content_counter");
+
+                    String title = content.getString("title");
+                    String contentId = content.getString("content_id");
+                    int hotRank = contentCounter.getIntValue("hot_rank");
+                    String articleUrl = jueJinPostUrl + contentId;
+
+                    // 构造 JSON 对象
+                    JSONObject article = new JSONObject();
+                    article.put("title", title);
+                    article.put("hotRank", hotRank);
+                    article.put("articleUrl", articleUrl);
+                    return article;
+                })
+                .sorted((a, b) -> Integer.compare(b.getIntValue("hot_rank"), a.getIntValue("hot_rank"))) // 按 hot_rank 降序
+                .collect(Collectors.toList());
+
+        // 打印结果
+        sortedArticles.forEach(article ->
+                log.info("\n标题：{}\n热度：{}\n文章地址：{}",
+                        article.getString("title"),
+                        article.getIntValue("hotRank"),
+                        article.getString("articleUrl"))
+        );
+
     }
 
     @Test

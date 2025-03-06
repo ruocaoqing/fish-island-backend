@@ -30,6 +30,7 @@ public class DataSourceRegistry {
     private final DouYinDataSource douYinDataSource;
     private final WYCloudDataSource wyCloudDataSource;
     private final CsdnDataSource csdnDataSource;
+    private final JueJinDataSource jueJinDataSource;
 
 
     @PostConstruct
@@ -43,6 +44,7 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.DOU_YIN.getValue(), wyCloudDataSource);
             put(HotDataKeyEnum.WY_CLOUD_MUSIC.getValue(), douYinDataSource);
             put(HotDataKeyEnum.CS_DN.getValue(), csdnDataSource);
+            put(HotDataKeyEnum.JUE_JIN.getValue(), jueJinDataSource);
         }};
     }
 
