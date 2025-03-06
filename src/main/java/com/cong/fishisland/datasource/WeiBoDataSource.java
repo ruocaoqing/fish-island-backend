@@ -83,13 +83,14 @@ public class WeiBoDataSource implements DataSource {
             Document document = Jsoup.parse(html);
             Element item = document.getElementsByTag("tbody").first();
             if (item != null) {
+                String tdKey = ".td-02";
                 Elements items = item.getElementsByTag("tr");
                 for (Element tmp : items) {
                     Element rankEle = tmp.getElementsByTag("td").first();
-                    Elements textEle = tmp.select(".td-02").select("a");
-                    Elements followerEle = tmp.select(".td-02").select("span");
+                    Elements textEle = tmp.select(tdKey).select("a");
+                    Elements followerEle = tmp.select(tdKey).select("span");
                     //过滤广告
-                    Elements rdEle = tmp.select(".td-02").select("span");
+                    Elements rdEle = tmp.select(tdKey).select("span");
                     if (!Objects.requireNonNull(rankEle).text().isEmpty() && !rdEle.text().isEmpty()) {
                         HotPostDataVO dataVO = HotPostDataVO.builder()
                                 .title(textEle.text())
@@ -105,7 +106,7 @@ public class WeiBoDataSource implements DataSource {
         }
 
         return HotPost.builder()
-                .sort(1)
+                .sort(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .name("微博热搜")
                 .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())

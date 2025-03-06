@@ -69,7 +69,7 @@ public class CsdnDataSource implements DataSource {
                 .collect(Collectors.toList());
 
         return HotPost.builder()
-                .sort(2)
+                .sort(CategoryTypeEnum.TECH_PROGRAMMING.getValue())
                 .category(CategoryTypeEnum.TECH_PROGRAMMING.getValue())
                 .name("CSDN热榜")
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())

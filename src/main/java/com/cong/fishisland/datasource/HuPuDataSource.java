@@ -49,7 +49,7 @@ public class HuPuDataSource implements DataSource {
 
         return HotPost.builder()
                 .name("虎扑热搜")
-                .sort(1)
+                .sort(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://hupu.com/favicon.ico")

@@ -92,7 +92,7 @@ public class CodeFatherDataSource implements DataSource {
         }
 
         return HotPost.builder()
-                .sort(2)
+                .sort(CategoryTypeEnum.TECH_PROGRAMMING.getValue())
                 .name("编程热门")
                 .category(CategoryTypeEnum.TECH_PROGRAMMING.getValue())
                 .updateInterval(UpdateIntervalEnum.ONE_DAY.getValue())

@@ -50,7 +50,7 @@ public class WYCloudDataSource implements DataSource {
             }).collect(Collectors.toList());
 
             return HotPost.builder()
-                    .sort(4)
+                    .sort(CategoryTypeEnum.MUSIC_HOT.getValue())
                     .category(CategoryTypeEnum.MUSIC_HOT.getValue())
                     .name("网易云热歌榜")
                     .updateInterval(UpdateIntervalEnum.TWO_HOUR.getValue())

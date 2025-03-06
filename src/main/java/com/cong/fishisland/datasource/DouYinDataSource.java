@@ -201,7 +201,7 @@ public class DouYinDataSource implements DataSource {
 
     private HotPost buildHotPost(List<HotPostDataVO> dataList) {
         return HotPost.builder()
-                .sort(3)
+                .sort(CategoryTypeEnum.VIDEO_ENTERTAINMENT.getValue())
                 .name("抖音热搜")
                 .category(CategoryTypeEnum.VIDEO_ENTERTAINMENT.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())

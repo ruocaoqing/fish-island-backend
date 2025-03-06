@@ -48,7 +48,7 @@ public class ZhiHuDataSource implements DataSource {
                     .build();
         }).collect(Collectors.toList());
         return HotPost.builder()
-                .sort(1)
+                .sort(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .name("知乎热榜")
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
