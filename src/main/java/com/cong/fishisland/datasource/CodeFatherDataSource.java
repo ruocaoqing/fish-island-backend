@@ -78,12 +78,10 @@ public class CodeFatherDataSource implements DataSource {
                 String recommendScore = jsonItem.getString("recommendScore");
                 String id = jsonItem.getString("id");
                 String url = "https://www.codefather.cn/" + (CharSequenceUtil.isBlank(title) ? "essay" : "post") + "/" + id;
-                String excerpt = jsonItem.getString("description");
                 HotPostDataVO dataVO = HotPostDataVO.builder()
                         .title(CharSequenceUtil.isBlank(title) ? content.substring(0, 20) : title)
                         .url(url)
                         .followerCount(Integer.parseInt(StringUtils.extractNumber(recommendScore)) * 10)
-                        .excerpt(excerpt)
                         .build();
                 dataList.add(dataVO);
             });

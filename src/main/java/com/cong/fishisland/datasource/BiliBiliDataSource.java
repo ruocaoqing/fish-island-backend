@@ -39,7 +39,6 @@ public class BiliBiliDataSource implements DataSource {
 
             // 提取基础字段
             String title = jsonItem.getString("title");
-            String desc = jsonItem.getString("desc");
             String shortLink = jsonItem.getString("short_link_v2");
 
             // 提取嵌套的统计信息
@@ -49,7 +48,6 @@ public class BiliBiliDataSource implements DataSource {
             return HotPostDataVO.builder()
                     .title(title)
                     .url(shortLink)
-                    .excerpt(desc)
                     .followerCount(view)
                     .build();
         }).collect(Collectors.toList());

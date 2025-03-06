@@ -48,13 +48,11 @@ public class CsdnDataSource implements DataSource {
                     String title = Optional.ofNullable(jsonItem.getString("articleTitle")).orElse("");
                     String articleDetailUrl = jsonItem.getString("articleDetailUrl");
                     String hotRankScore = Optional.ofNullable(jsonItem.getString("hotRankScore")).orElse("0");
-                    String excerpt = title.length() > 30 ? title.substring(0, 20) : title;
 
                     return HotPostDataVO.builder()
                             .title(title)
                             .url(articleDetailUrl)
                             .followerCount(parseHotRankScore(hotRankScore))
-                            .excerpt(excerpt)
                             .build();
                 }).collect(Collectors.toList());
                 allDataList.addAll(dataList);

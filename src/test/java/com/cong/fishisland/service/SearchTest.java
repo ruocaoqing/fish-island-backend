@@ -244,13 +244,11 @@ class SearchTest extends TestBaseByLogin {
             String recommendScore = jsonItem.getString("recommendScore");
             String id = jsonItem.getString("id");
             String url = "https://www.codefather.cn/post/" + id;
-            String excerpt = jsonItem.getString("description");
 
             return HotPostDataVO.builder()
                     .title(title)
                     .url(url)
                     .followerCount(Integer.parseInt(StringUtils.extractNumber(recommendScore)) * 10)
-                    .excerpt(excerpt)
                     .build();
         }).collect(Collectors.toList());
 

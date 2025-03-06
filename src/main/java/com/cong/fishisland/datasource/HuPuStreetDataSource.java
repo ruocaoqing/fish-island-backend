@@ -93,14 +93,12 @@ public class HuPuStreetDataSource implements DataSource {
             // 拼接完整的帖子 URL
             postUrl = HUPU_URL + postUrl;
 
-            String source = listItem.select("div.t-label").text();
             String title = listItem.select("span.t-title").text();
             Integer hot = parseHot(listItem.select("span.t-lights").text());
 
             return HotPostDataVO.builder()
                     .title(title)
                     .url(postUrl)
-                    .excerpt(source)
                     .followerCount(hot)
                     .build();
         } catch (Exception e) {

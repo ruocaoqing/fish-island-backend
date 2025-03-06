@@ -83,14 +83,12 @@ public class HuPuDataSource implements DataSource {
     private HotPostDataVO extractPostData(Element listItem) {
         try {
             String postUrl = listItem.select("a.list-item-title").attr("href");
-            String desc = listItem.select("div.list-item-desc").text();
             String title = listItem.select("div.item-title-conent").text();
             Integer hot = parseHot(listItem.select("div.list-item-lights").text());
 
             return HotPostDataVO.builder()
                     .title(title)
                     .url(postUrl)
-                    .excerpt(desc)
                     .followerCount(hot)
                     .build();
         } catch (Exception e) {

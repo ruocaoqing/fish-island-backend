@@ -19,11 +19,6 @@ public class HotPostDataVO implements Serializable {
     private String title;
 
     /**
-     * 摘要
-     */
-    private String excerpt;
-
-    /**
      * 热度
      */
     private Integer followerCount;

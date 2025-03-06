@@ -38,13 +38,11 @@ public class ZhiHuDataSource implements DataSource {
             String[] parts = target.getString("url").split("/");
             String url = "https://zhihu.com/question/" + parts[parts.length - 1];
             String followerCount = jsonItem.getString("detail_text");
-            String excerpt = target.getString("excerpt");
 
             return HotPostDataVO.builder()
                     .title(title)
                     .url(url)
                     .followerCount(Integer.parseInt(StringUtils.extractNumber(followerCount)) * 10000)
-                    .excerpt(excerpt)
                     .build();
         }).collect(Collectors.toList());
         return HotPost.builder()

@@ -67,13 +67,11 @@ public class JueJinDataSource implements DataSource {
                                 String title = content.getString("title");
                                 String contentId = content.getString("content_id");
                                 int hotRank = contentCounter.getIntValue("hot_rank");
-                                String excerpt = title.length() > 30 ? title.substring(0, 27) + "..." : title;
 
                                 allDataList.add(HotPostDataVO.builder()
                                         .title(title)
                                         .url(JUE_JIN_POST_URL + contentId)
                                         .followerCount(hotRank)
-                                        .excerpt(excerpt)
                                         .build());
 
                             } catch (Exception e) {

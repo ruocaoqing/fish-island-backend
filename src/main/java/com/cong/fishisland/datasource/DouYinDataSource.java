@@ -183,14 +183,11 @@ public class DouYinDataSource implements DataSource {
             String encodedTitle = URLEncoder.encode(title, "UTF-8").replace("+", "%20");
             String url = String.format("%s/%s/%s", hotBaseUrl, sentenceId, encodedTitle);
 
-            // 摘要字段
-            String excerpt = title.length() > 50 ? title.substring(0, 50) : title;
 
             return HotPostDataVO.builder()
                     .title(title)
                     .url(url)
                     .followerCount(followerCount)
-                    .excerpt(excerpt)
                     .build();
 
         } catch (Exception e) {
