@@ -29,6 +29,7 @@ public class DataSourceRegistry {
     private final HuPuStreetDataSource huPuStreetDataSource;
     private final DouYinDataSource douYinDataSource;
     private final WYCloudDataSource wyCloudDataSource;
+    private final CsdnDataSource csdnDataSource;
 
 
     @PostConstruct
@@ -39,8 +40,9 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.CODE_FATHER.getValue(), codeFatherDataSource);
             put(HotDataKeyEnum.BILI_BILI.getValue(), bilibiliDataSource);
             put(HotDataKeyEnum.HU_PU_STREET.getValue(), huPuStreetDataSource);
-            put(HotDataKeyEnum.DOU_YIN.getValue(), douYinDataSource);
-            put(HotDataKeyEnum.WY_CLOUD_MUSIC.getValue(), wyCloudDataSource);
+            put(HotDataKeyEnum.DOU_YIN.getValue(), wyCloudDataSource);
+            put(HotDataKeyEnum.WY_CLOUD_MUSIC.getValue(), douYinDataSource);
+            put(HotDataKeyEnum.CS_DN.getValue(), csdnDataSource);
         }};
     }
 

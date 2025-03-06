@@ -53,6 +53,34 @@ class SearchTest extends TestBaseByLogin {
     }
 
     @Test
+    void CsdnTest() {
+        String csdnHotUrl = "https://blog.csdn.net/phoenix/web/blog/hot-rank";
+        int pageSize = 25;
+        int pagesNeeded = 5;
+        for (int page = 0; page < pagesNeeded; page++) {
+            // 构造请求 URL，自动翻页
+            String url = csdnHotUrl + "?page=" + page + "&pageSize=" + pageSize + "&type=";
+            // 发送 GET 请求并获取响应内容
+            String result = HttpRequest.get(url).execute().body();
+            // 解析 JSON 数据
+            JSONObject resultJson = JSON.parseObject(result);
+            JSONArray data = resultJson.getJSONArray("data");
+
+            data.forEach(item -> {
+                JSONObject jsonItem = (JSONObject) item;
+                String title = jsonItem.getString("articleTitle");
+                String articleDetailUrl = jsonItem.getString("articleDetailUrl");
+                String hotRankScore = jsonItem.getString("hotRankScore");
+                // 摘要字段由 title 限制 20 字修改而来
+                String excerpt = title.length() > 20 ? title.substring(0, 20) : title;
+
+                log.info("\n标题：{}，\n链接：{}，\n热度：{}，\n摘要：{}", title, articleDetailUrl, hotRankScore, excerpt);
+            });
+
+        }
+    }
+
+    @Test
     void weiboSearchTest() throws IOException {
         //获取tid
         String tidUrl = "https://passport.weibo.com/visitor/genvisitor";
@@ -176,6 +204,7 @@ class SearchTest extends TestBaseByLogin {
         log.info("dataList: {}", dataList);
 
     }
+
     @Test
     void WYCloudSearchTest() {
         CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -192,13 +221,12 @@ class SearchTest extends TestBaseByLogin {
             first.select("a").forEach(item -> {
                 String title = item.text();
                 String url = item.attr("href");
-                System.out.println(title + "url: "+"https://music.163.com" + url);
+                System.out.println(title + "url: " + "https://music.163.com" + url);
             });
 
         } catch (Exception e) {
             log.error("获取微博热搜失败", e);
         }
     }
-
 
 }
