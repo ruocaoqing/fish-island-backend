@@ -48,7 +48,7 @@ public class DataSourceRegistry {
 
 
     public DataSource getDataSourceByType(String type) {
-        if (typeDataSourceMap==null){
+        if (typeDataSourceMap == null) {
             return null;
         }
         return typeDataSourceMap.get(type);

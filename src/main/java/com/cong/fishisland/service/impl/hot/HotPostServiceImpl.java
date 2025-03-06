@@ -1,5 +1,6 @@
 package com.cong.fishisland.service.impl.hot;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cong.fishisland.model.entity.hot.HotPost;
 import com.cong.fishisland.model.vo.hot.HotPostVO;
@@ -21,7 +22,7 @@ public class HotPostServiceImpl extends ServiceImpl<HotPostMapper, HotPost>
 
     @Override
     public List<HotPostVO> getHotPostList() {
-        return this.list().stream().map(HotPostVO::objToVo).collect(Collectors.toList());
+        return this.list(new LambdaQueryWrapper<HotPost>().orderByAsc(HotPost::getSort)).stream().map(HotPostVO::objToVo).collect(Collectors.toList());
     }
 }
 

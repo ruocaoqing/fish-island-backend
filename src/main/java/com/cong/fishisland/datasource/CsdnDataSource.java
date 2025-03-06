@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Component
 public class CsdnDataSource implements DataSource {
 
-    private static final String csdnHotUrl = "https://blog.csdn.net/phoenix/web/blog/hot-rank";
+    private static final String CSDN_HOT_URL = "https://blog.csdn.net/phoenix/web/blog/hot-rank";
 
     @Override
     public HotPost getHotPost() {
@@ -35,7 +35,7 @@ public class CsdnDataSource implements DataSource {
         List<HotPostDataVO> allDataList = new ArrayList<>();
 
         for (int page = 0; page < pagesNeeded; page++) {
-            String url = csdnHotUrl + "?page=" + page + "&pageSize=" + pageSize + "&type=";
+            String url = CSDN_HOT_URL + "?page=" + page + "&pageSize=" + pageSize + "&type=";
 
             try {
                 // 发送 GET 请求并获取 JSON 响应
@@ -69,6 +69,7 @@ public class CsdnDataSource implements DataSource {
                 .collect(Collectors.toList());
 
         return HotPost.builder()
+                .sort(2)
                 .category(CategoryTypeEnum.TECH_PROGRAMMING.getValue())
                 .name("CSDN热榜")
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())

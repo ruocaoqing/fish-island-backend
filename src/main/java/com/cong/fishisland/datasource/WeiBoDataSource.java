@@ -105,6 +105,7 @@ public class WeiBoDataSource implements DataSource {
         }
 
         return HotPost.builder()
+                .sort(1)
                 .name("微博热搜")
                 .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())

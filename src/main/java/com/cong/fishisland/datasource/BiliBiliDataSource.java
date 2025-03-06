@@ -55,6 +55,7 @@ public class BiliBiliDataSource implements DataSource {
         }).collect(Collectors.toList());
 
         return HotPost.builder()
+                .sort(3)
                 .name("B站热门")
                 .category(CategoryTypeEnum.VIDEO_ENTERTAINMENT.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
