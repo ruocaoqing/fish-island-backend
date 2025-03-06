@@ -41,9 +41,11 @@ public class WYCloudDataSource implements DataSource {
             List<HotPostDataVO> dataList = first.select("a").stream().map(item -> {
                 String title = item.text();
                 String url = item.attr("href");
+                String[] urlArray = url.split("=");
                 return HotPostDataVO.builder()
                         .title(title)
-                        .url("https://music.163.com" + url)
+//                        .url("https://music.163.com" + url)
+                        .url("//music.163.com/outchain/player?type=2&id=" + urlArray[1] + "&auto=0&height=66")
                         .build();
             }).collect(Collectors.toList());
 
