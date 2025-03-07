@@ -85,3 +85,108 @@
 ## 联系方式
 
 如有任何问题或建议，请联系项目作者：[@lhccong](https://github.com/lhccong) 
+
+## 🎯 贡献指南
+感谢您对 **fish-island** 的关注和贡献！欢迎各位开发者参与！🎉
+
+---
+
+### 📌 贡献方式
+
+添加各位想要的数据源，以实现更丰富的内容。
+
+#### 1️⃣ 页面元素抓取
+
+📌 **适用于**：目标网站未提供 API，数据嵌入在 HTML 结构中。
+
+#### ✅ 贡献要求
+
+- **推荐使用**：
+   - `Jsoup`（Java）
+   - `BeautifulSoup`（Python）
+   - `Cheerio`（Node.js）
+- **选择器精准**：避免因页面结构变化导致抓取失败。
+- **减少 HTTP 请求**：优化抓取效率，避免重复请求。
+- **遵守网站爬取规则**（`robots.txt` ）。
+
+#### 💡 示例代码
+
+```java
+Document doc = Jsoup.connect("https://example.com").get();
+String title = doc.select("h1.article-title").text();
+```
+
+---
+
+#### 2️⃣ 页面接口返回数据抓取
+
+📌 **适用于**：目标网站提供 API，可直接调用接口获取 JSON/XML 数据。
+
+#### ✅ 贡献要求
+
+- **推荐使用**：
+   - `HttpClient`（Java）
+   - `axios`（Node.js）
+   - `requests`（Python）
+- **分析 API 请求**：确保请求参数完整（`headers`、`cookies`、`token`）。
+- **减少不必要的请求**：优化调用频率，避免触发反爬机制。
+- **异常处理**：确保代码稳定运行。
+
+#### 💡 示例代码
+
+```java
+String apiUrl = "https://api.example.com/data";
+String response = HttpRequest.get(apiUrl).execute().body();
+JSONObject json = JSON.parseObject(response);
+```
+
+---
+
+### 🔗 数据源注册
+
+数据抓取完成后，需要注册数据源，以便系统能够正确使用。
+
+### 🚀 注册流程
+
+1. **添加数据源 Key**：
+   `/src/main/java/com/cong/fishisland/model/enums/HotDataKeyEnum.java` 定义新的数据源 Key。
+
+2. **更新数据源映射**：
+
+   -  `/src/main/java/com/lhccong/fish/backend/config/DatabaseConfig.java` 文件中，添加新的数据源配置。
+
+3. **创建数据源类**：
+
+   -  `src/main/java/com/cong/fishisland/datasource` 目录下，新建数据源类，继承 `DataSource`，实现 `getHotPost` 方法。
+
+4. **实现数据获取逻辑**：
+
+   - 按照 `HotPostDataVO` 格式返回数据。
+   - 使用 `@Builder` 注解，确保数据能正确解析。
+
+#### 💡 示例代码
+
+```java
+HotPostDataVO.builder()
+            .title(title)
+            .url(url)
+            .followerCount(followerCount)
+            .excerpt(excerpt)
+            .build();
+```
+
+---
+
+### 🚀 贡献流程
+
+1. **Fork 仓库** ➜ 点击 GitHub 右上角 `Fork` 按钮。
+2. **创建分支** ➜ 推荐使用有意义的分支名，如 `feature/data-scraper-optimization`。
+3. **提交代码** ➜ 确保代码可读性高，符合规范。
+4. **提交 Pull Request（PR）** ➜ 详细描述您的更改内容，并关联相关 issue（如有）。
+5. **等待审核** ➜ 维护者会进行代码审核并合并。
+
+---
+
+### 🎉 感谢您的贡献！
+
+您的每一份贡献都让 **fish-island** 变得更好！💪
