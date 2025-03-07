@@ -51,7 +51,7 @@ public class ZhiHuDataSource implements DataSource {
                 .name("知乎热榜")
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://www.zhihu.com/favicon.ico")
-                .hostJson(JSON.toJSONString(dataList))
+                .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
                 .typeName("知乎")
                 .build();
     }

@@ -111,7 +111,7 @@ public class WeiBoDataSource implements DataSource {
                 .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://s.weibo.com/favicon.ico")
-                .hostJson(JSON.toJSONString(dataList))
+                .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
                 .typeName("微博")
                 .build();
     }

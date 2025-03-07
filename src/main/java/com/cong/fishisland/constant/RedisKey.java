@@ -29,6 +29,8 @@ public interface RedisKey {
      */
     String USER_TOKEN_STRING = "userToken:uid_%d";
 
+    String HOT_POST_CACHE_KEY = "hot_post_list";
+
     static String getKey(String key, Object... objects) {
         return BASE_KEY + String.format(key, objects);
     }

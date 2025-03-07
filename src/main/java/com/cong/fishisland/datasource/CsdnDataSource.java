@@ -72,7 +72,8 @@ public class CsdnDataSource implements DataSource {
                 .name("CSDN热榜")
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://blog.csdn.net/favicon.ico")
-                .hostJson(JSON.toJSONString(sortedDataList))
+                // 取前 20 条数据
+                .hostJson(JSON.toJSONString(sortedDataList.subList(0, Math.min(sortedDataList.size(), 20))))
                 .typeName("CSDN")
                 .build();
     }

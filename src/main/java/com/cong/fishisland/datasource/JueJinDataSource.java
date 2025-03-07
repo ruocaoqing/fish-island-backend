@@ -95,7 +95,8 @@ public class JueJinDataSource implements DataSource {
                 .iconUrl("https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web//static/favicon.ico")
                 .hostJson(JSON.toJSONString(allDataList.stream()
                         .sorted(Comparator.comparingInt(HotPostDataVO::getFollowerCount).reversed())
-                        .collect(Collectors.toList())))
+                        .collect(Collectors.toList())
+                        .subList(0, Math.min(allDataList.size(), 20))))
                 .typeName("掘金")
                 .build();
     }

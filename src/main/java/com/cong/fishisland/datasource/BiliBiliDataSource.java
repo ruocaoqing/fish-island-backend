@@ -59,7 +59,9 @@ public class BiliBiliDataSource implements DataSource {
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://www.bilibili.com/favicon.ico")
                 //按 followerCount 降序排序
-                .hostJson(JSON.toJSONString(dataList.stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())))
+                .hostJson(JSON.toJSONString(dataList
+                        .stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())
+                        .subList(0, Math.min(dataList.size(), 20))))
                 .typeName("哔哩哔哩")
                 .build();
     }

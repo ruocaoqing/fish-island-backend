@@ -203,7 +203,8 @@ public class DouYinDataSource implements DataSource {
                 .category(CategoryTypeEnum.VIDEO_ENTERTAINMENT.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://lf1-cdn-tos.bytegoofy.com/goofy/ies/douyin_web/public/favicon.ico")
-                .hostJson(JSON.toJSONString(dataList))
+                // 取前 20 条数据
+                .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
                 .typeName("抖音")
                 .build();
     }

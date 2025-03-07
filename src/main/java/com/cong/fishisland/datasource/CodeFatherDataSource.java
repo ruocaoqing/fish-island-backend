@@ -95,7 +95,8 @@ public class CodeFatherDataSource implements DataSource {
                 .category(CategoryTypeEnum.TECH_PROGRAMMING.getValue())
                 .updateInterval(UpdateIntervalEnum.ONE_DAY.getValue())
                 .iconUrl("https://www.codefather.cn/favicon.ico")
-                .hostJson(JSON.toJSONString(dataList))
+                //只拿前 20 条数据
+                .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
                 .typeName("编程导航")
                 .build();
     }

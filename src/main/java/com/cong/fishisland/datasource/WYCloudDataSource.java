@@ -55,7 +55,7 @@ public class WYCloudDataSource implements DataSource {
                     .name("网易云热歌榜")
                     .updateInterval(UpdateIntervalEnum.TWO_HOUR.getValue())
                     .iconUrl("https://s1.aigei.com/src/img/png/6c/6c2a6e0d311c4df8b479c7e998245840.png?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:lEH71zFLIFDtxkPgdrHHVsRvgEU=")
-                    .hostJson(JSON.toJSONString(dataList))
+                    .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
                     .typeName("网易云")
                     .build();
 

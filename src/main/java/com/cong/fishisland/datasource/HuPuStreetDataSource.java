@@ -55,7 +55,9 @@ public class HuPuStreetDataSource implements DataSource {
                 .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://hupu.com/favicon.ico")
-                .hostJson(JSON.toJSONString(dataList.stream().sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())))
+                .hostJson(JSON.toJSONString(dataList.stream()
+                        .sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())
+                        .subList(0, Math.min(dataList.size(), 20))))
                 .typeName("虎扑步行街")
                 .build();
     }
