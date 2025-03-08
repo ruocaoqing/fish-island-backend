@@ -10,12 +10,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
+import com.cong.fishisland.constant.SystemConstants;
 import com.cong.fishisland.model.dto.ws.WSChannelExtraDTO;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.MessageTypeEnum;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
 import com.cong.fishisland.model.ws.request.MessageWrapper;
 import com.cong.fishisland.model.ws.request.WSBaseReq;
+import com.cong.fishisland.model.ws.response.UserChatResponse;
 import com.cong.fishisland.model.ws.response.WSBaseResp;
 import com.cong.fishisland.service.UserService;
 import com.cong.fishisland.websocket.cache.UserCache;
@@ -32,12 +34,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 
 /**
@@ -58,9 +58,8 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Qualifier(ThreadPoolConfig.WS_EXECUTOR)
     private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private final ApplicationEventPublisher applicationEventPublisher;
-    
-    private static final String ROOM_ID = "roomId";
 
+    private static final String ROOM_ID = "roomId";
 
 
     /**
@@ -276,9 +275,32 @@ public class WebSocketServiceImpl implements WebSocketService {
      * 用户上线
      */
     private void online(Channel channel, Long uid) {
-        getOrInitChannelExt(channel).setUid(uid);
+        Object userObj = StpUtil.getTokenSessionByToken(NettyUtil.getAttr(channel, NettyUtil.TOKEN)).get(SystemConstants.USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        UserChatResponse userChatResponse = new UserChatResponse();
+        userChatResponse.setId(String.valueOf(currentUser.getId()));
+        userChatResponse.setName(currentUser.getUserName());
+        userChatResponse.setAvatar(currentUser.getUserAvatar());
+        //目前为一级
+        userChatResponse.setLevel(1);
+        userChatResponse.setIsAdmin(currentUser.getUserRole().equals("admin") ?
+                Boolean.TRUE : Boolean.FALSE);
+        userChatResponse.setStatus("在线");
+
+        WSChannelExtraDTO channelExt = getOrInitChannelExt(channel);
+        channelExt.setUid(uid);
+        channelExt.setUserChatResponse(userChatResponse);
         ONLINE_UID_MAP.putIfAbsent(uid, new CopyOnWriteArrayList<>());
         ONLINE_UID_MAP.get(uid).add(channel);
+
+        //发送所有在线用户给当前用户
+        List<UserChatResponse> currentOnlineUsers = ONLINE_WS_MAP.values().stream().map(WSChannelExtraDTO::getUserChatResponse).collect(Collectors.toList());
+        sendMsg(channel, WSBaseResp.builder().type(MessageTypeEnum.USER_ONLINE.getType()).data(currentOnlineUsers).build());
+
+        //发送当前用户上线信息给所有人
+        sendToAllOnline(WSBaseResp.builder()
+                .type(MessageTypeEnum.USER_ONLINE.getType())
+                .data(Collections.singletonList(userChatResponse)).build(), uid);
     }
 
     /**

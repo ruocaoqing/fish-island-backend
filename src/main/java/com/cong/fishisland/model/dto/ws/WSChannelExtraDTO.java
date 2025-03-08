@@ -1,5 +1,6 @@
 package com.cong.fishisland.model.dto.ws;
 
+import com.cong.fishisland.model.ws.response.UserChatResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,9 @@ public class WSChannelExtraDTO {
      * 前端如果登录了，记录uid
      */
     private Long uid;
+
+    /**
+     * 前端如果登录了，记录用户信息
+     */
+    private UserChatResponse userChatResponse;
 }
