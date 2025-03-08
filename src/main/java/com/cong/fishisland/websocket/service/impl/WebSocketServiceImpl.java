@@ -14,6 +14,7 @@ import com.cong.fishisland.model.dto.ws.WSChannelExtraDTO;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.MessageTypeEnum;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
+import com.cong.fishisland.model.ws.request.MessageWrapper;
 import com.cong.fishisland.model.ws.request.WSBaseReq;
 import com.cong.fishisland.model.ws.response.WSBaseResp;
 import com.cong.fishisland.service.UserService;
@@ -57,6 +58,9 @@ public class WebSocketServiceImpl implements WebSocketService {
     @Qualifier(ThreadPoolConfig.WS_EXECUTOR)
     private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
     private final ApplicationEventPublisher applicationEventPublisher;
+    
+    private static final String ROOM_ID = "roomId";
+
 
 
     /**
@@ -106,6 +110,9 @@ public class WebSocketServiceImpl implements WebSocketService {
      */
     @Override
     public void connect(Channel channel) {
+        if (ONLINE_WS_MAP.contains(channel)) {
+            return;
+        }
         ONLINE_WS_MAP.put(channel, new WSChannelExtraDTO());
     }
 
@@ -187,6 +194,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         MessageTypeEnum messageTypeEnum = MessageTypeEnum.of(chatMessageVo.getType());
         //发送消息
         switch (messageTypeEnum) {
+            case CHAT:
+                MessageWrapper messageDto = JSON.parseObject(chatMessageVo.getContent(), MessageWrapper.class);
+                sendToAllOnline(WSBaseResp.builder()
+                        .type(MessageTypeEnum.CHAT.getType())
+                        .data(messageDto).build(), loginUserId);
+                break;
             case CREATE_CHESS_ROOM:
                 //创建棋局房间
                 createRoom(channel);
@@ -197,19 +210,23 @@ public class WebSocketServiceImpl implements WebSocketService {
                 break;
             case MOVE_CHESS:
                 //移动棋子
-                CopyOnWriteArrayList<Channel> channels = ONLINE_UID_MAP.get(uid);
-                Map<String, Object> data = new HashMap<>();
-                JSONObject message = JSON.parseObject(chatMessageVo.getContent());
-                data.put("roomId", message.get("roomId"));
-                data.put("position", message.get("position"));
-                data.put("player", message.get("player"));
-                WSBaseResp<Object> wsBaseResp = WSBaseResp.builder()
-                        .type(MessageTypeEnum.MOVE_CHESS.getType()).data(data).build();
-                channels.forEach(item -> threadPoolTaskExecutor.execute(() -> sendMsg(item, wsBaseResp)));
+                moveChess(chatMessageVo, uid);
                 break;
             default:
                 break;
         }
+    }
+
+    private void moveChess(ChatMessageVo chatMessageVo, Long uid) {
+        CopyOnWriteArrayList<Channel> channels = ONLINE_UID_MAP.get(uid);
+        Map<String, Object> data = new HashMap<>();
+        JSONObject message = JSON.parseObject(chatMessageVo.getContent());
+        data.put(ROOM_ID, message.get(ROOM_ID));
+        data.put("position", message.get("position"));
+        data.put("player", message.get("player"));
+        WSBaseResp<Object> wsBaseResp = WSBaseResp.builder()
+                .type(MessageTypeEnum.MOVE_CHESS.getType()).data(data).build();
+        channels.forEach(item -> threadPoolTaskExecutor.execute(() -> sendMsg(item, wsBaseResp)));
     }
 
     private void createRoom(Channel channel) {
@@ -237,7 +254,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         Channel roomOwner = channels.get(0);
         //把当前登录用户传给对方
         Map<String, Object> data = new HashMap<>();
-        data.put("roomId", joinRoomId);
+        data.put(ROOM_ID, joinRoomId);
         data.put("playerId", String.valueOf(loginUserId));
         data.put("yourColor", "black");
         data.put("opponentColor", "white");
@@ -246,7 +263,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         //把获取房主传给当前登录用户
         WSChannelExtraDTO wsChannelExtraDTO = ONLINE_WS_MAP.get(roomOwner);
         Map<String, Object> data2 = new HashMap<>();
-        data2.put("roomId", joinRoomId);
+        data2.put(ROOM_ID, joinRoomId);
         data2.put("playerId", String.valueOf(wsChannelExtraDTO.getUid()));
         data2.put("yourColor", "white");
         data2.put("opponentColor", "black");

@@ -22,6 +22,7 @@ public enum MessageTypeEnum {
     JOIN_ROOM("joinRoom", "加入房间"),
     MOVE_CHESS("moveChess", "对方落子"),
     JOIN_SUCCESS("joinSuccess", "成功加入房间"),
+    CHAT("chat", "群聊天消息"),
     ;
 
     private final String type;
