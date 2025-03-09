@@ -5,15 +5,16 @@ import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ResultUtils;
 import com.cong.fishisland.model.dto.chat.MessageQueryRequest;
 import com.cong.fishisland.model.vo.chat.RoomMessageVo;
+import com.cong.fishisland.model.ws.response.UserChatResponse;
 import com.cong.fishisland.service.RoomMessageService;
+import com.cong.fishisland.websocket.service.WebSocketService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 聊天控制器
@@ -29,11 +30,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatController {
 
     private final RoomMessageService roomMessageService;
+    private final WebSocketService webSocketService;
 
     @PostMapping("/message/page/vo")
     @ApiOperation(value = "分页获取用户房间消息列表")
     public BaseResponse<Page<RoomMessageVo>> listMessageVoByPage(@RequestBody MessageQueryRequest messageQueryRequest) {
         Page<RoomMessageVo> messageVoPage = roomMessageService.listMessageVoByPage(messageQueryRequest);
         return ResultUtils.success(messageVoPage);
+    }
+
+    @GetMapping("/online/user")
+    @ApiOperation(value = "获取在线用户列表")
+    public BaseResponse<List<UserChatResponse>> getOnlineUserList() {
+      return   ResultUtils.success(webSocketService.getOnlineUserList());
+
     }
 }

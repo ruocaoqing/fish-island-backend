@@ -8,6 +8,7 @@ import cn.hutool.json.JSONUtil;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
 import com.cong.fishisland.constant.UserConstant;
@@ -112,6 +113,7 @@ public class WebSocketServiceImpl implements WebSocketService {
      */
     @Override
     public void connect(Channel channel) {
+        log.info("websocket连接成功");
     }
 
     @Override
@@ -190,6 +192,13 @@ public class WebSocketServiceImpl implements WebSocketService {
         Long uid = Long.valueOf(req.getUserId());
         sendByType(chatMessageVo, token, uid, null);
 
+    }
+
+    @Override
+    public List<UserChatResponse> getOnlineUserList() {
+        return ONLINE_WS_MAP.values().stream()
+                .map(WSChannelExtraDTO::getUserChatResponse)
+                .collect(Collectors.toList());
     }
 
     private void sendByType(ChatMessageVo chatMessageVo, String token, Long uid, Channel channel) {
@@ -310,10 +319,6 @@ public class WebSocketServiceImpl implements WebSocketService {
 
 
         ONLINE_WS_MAP.put(channel, wsChannelExtraDTO);
-
-        //发送所有在线用户给当前用户
-        List<UserChatResponse> currentOnlineUsers = ONLINE_WS_MAP.values().stream().map(WSChannelExtraDTO::getUserChatResponse).collect(Collectors.toList());
-        sendMsg(channel, WSBaseResp.builder().type(MessageTypeEnum.USER_ONLINE.getType()).data(currentOnlineUsers).build());
 
         //发送当前用户上线信息给所有人
         sendToAllOnline(WSBaseResp.builder()

@@ -2,8 +2,11 @@ package com.cong.fishisland.websocket.service;
 
 
 import com.cong.fishisland.model.ws.request.WSBaseReq;
+import com.cong.fishisland.model.ws.response.UserChatResponse;
 import com.cong.fishisland.model.ws.response.WSBaseResp;
 import io.netty.channel.Channel;
+
+import java.util.List;
 
 /**
  * Web 套接字服务
@@ -52,6 +55,8 @@ public interface WebSocketService {
     void sendToUid(WSBaseResp<?> wsBaseResp, Long uid);
 
     void sendMessage(Channel channel, WSBaseReq req);
+
     void sendMessage(String token, WSBaseReq req);
 
+    List<UserChatResponse> getOnlineUserList();
 }
