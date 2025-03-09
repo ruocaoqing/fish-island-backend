@@ -10,8 +10,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
-import com.cong.fishisland.constant.SystemConstants;
+import com.cong.fishisland.constant.UserConstant;
 import com.cong.fishisland.model.dto.ws.WSChannelExtraDTO;
+import com.cong.fishisland.model.entity.chat.RoomMessage;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.MessageTypeEnum;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
@@ -19,6 +20,7 @@ import com.cong.fishisland.model.ws.request.MessageWrapper;
 import com.cong.fishisland.model.ws.request.WSBaseReq;
 import com.cong.fishisland.model.ws.response.UserChatResponse;
 import com.cong.fishisland.model.ws.response.WSBaseResp;
+import com.cong.fishisland.service.RoomMessageService;
 import com.cong.fishisland.service.UserService;
 import com.cong.fishisland.websocket.cache.UserCache;
 import com.cong.fishisland.websocket.event.UserOfflineEvent;
@@ -60,6 +62,7 @@ public class WebSocketServiceImpl implements WebSocketService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private static final String ROOM_ID = "roomId";
+    private final RoomMessageService roomMessageService;
 
 
     /**
@@ -109,10 +112,6 @@ public class WebSocketServiceImpl implements WebSocketService {
      */
     @Override
     public void connect(Channel channel) {
-        if (ONLINE_WS_MAP.contains(channel)) {
-            return;
-        }
-        ONLINE_WS_MAP.put(channel, new WSChannelExtraDTO());
     }
 
     @Override
@@ -126,6 +125,11 @@ public class WebSocketServiceImpl implements WebSocketService {
             User user = new User();
             user.setId(uidOptional.get());
             applicationEventPublisher.publishEvent(new UserOfflineEvent(this, user));
+            //推送其他用户下线事件
+            //发送当前用户上线信息给所有人
+            sendToAllOnline(WSBaseResp.builder()
+                    .type(MessageTypeEnum.USER_OFFLINE.getType())
+                    .data(uidOptional.get().toString()).build(), uidOptional.get());
         }
     }
 
@@ -198,6 +202,12 @@ public class WebSocketServiceImpl implements WebSocketService {
                 sendToAllOnline(WSBaseResp.builder()
                         .type(MessageTypeEnum.CHAT.getType())
                         .data(messageDto).build(), loginUserId);
+                //保存消息到数据库
+                RoomMessage roomMessage = new RoomMessage();
+                roomMessage.setUserId(loginUserId);
+                roomMessage.setRoomId(-1L);
+                roomMessage.setMessageJson(JSON.toJSONString(messageDto));
+                roomMessageService.save(roomMessage);
                 break;
             case CREATE_CHESS_ROOM:
                 //创建棋局房间
@@ -275,15 +285,18 @@ public class WebSocketServiceImpl implements WebSocketService {
      * 用户上线
      */
     private void online(Channel channel, Long uid) {
-        Object userObj = StpUtil.getTokenSessionByToken(NettyUtil.getAttr(channel, NettyUtil.TOKEN)).get(SystemConstants.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
+        if (ONLINE_WS_MAP.values().stream().anyMatch(item -> Objects.equals(item.getUid(), uid))) {
+            return;
+        }
+
+        User currentUser = userService.getLoginUser(NettyUtil.getAttr(channel, NettyUtil.TOKEN));
         UserChatResponse userChatResponse = new UserChatResponse();
         userChatResponse.setId(String.valueOf(currentUser.getId()));
         userChatResponse.setName(currentUser.getUserName());
         userChatResponse.setAvatar(currentUser.getUserAvatar());
         //目前为一级
         userChatResponse.setLevel(1);
-        userChatResponse.setIsAdmin(currentUser.getUserRole().equals("admin") ?
+        userChatResponse.setIsAdmin(currentUser.getUserRole().equals(UserConstant.ADMIN_ROLE) ?
                 Boolean.TRUE : Boolean.FALSE);
         userChatResponse.setStatus("在线");
 
@@ -291,7 +304,12 @@ public class WebSocketServiceImpl implements WebSocketService {
         channelExt.setUid(uid);
         channelExt.setUserChatResponse(userChatResponse);
         ONLINE_UID_MAP.putIfAbsent(uid, new CopyOnWriteArrayList<>());
-        ONLINE_UID_MAP.get(uid).add(channel);
+        WSChannelExtraDTO wsChannelExtraDTO = new WSChannelExtraDTO();
+        wsChannelExtraDTO.setUid(uid);
+        wsChannelExtraDTO.setUserChatResponse(userChatResponse);
+
+
+        ONLINE_WS_MAP.put(channel, wsChannelExtraDTO);
 
         //发送所有在线用户给当前用户
         List<UserChatResponse> currentOnlineUsers = ONLINE_WS_MAP.values().stream().map(WSChannelExtraDTO::getUserChatResponse).collect(Collectors.toList());
@@ -337,8 +355,10 @@ public class WebSocketServiceImpl implements WebSocketService {
             if (CollUtil.isNotEmpty(channels)) {
                 channels.removeIf(channel1 -> channel1.equals(channel));
             }
+            ONLINE_UID_MAP.remove(uidOptional.get());
             return CollUtil.isEmpty(ONLINE_UID_MAP.get(uidOptional.get()));
         }
+
         return true;
     }
 }

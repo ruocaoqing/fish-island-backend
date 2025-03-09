@@ -96,3 +96,15 @@ create table if not exists todo
     updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     isDelete   tinyint  default 0                 not null comment '是否删除'
 ) comment '待办表' collate = utf8mb4_unicode_ci;
+
+-- 房间消息表
+create table if not exists room_message
+(
+    id         bigint auto_increment comment 'id' primary key,
+    userId     bigint                             not null comment '用户 id',
+    roomId     bigint                             not null comment '房间 id',
+    messageJson      mediumtext                       null comment '消息 Json 数据（json）',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除'
+) comment '房间消息表' collate = utf8mb4_unicode_ci;
