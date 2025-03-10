@@ -8,6 +8,7 @@ import cn.hutool.json.JSONUtil;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
@@ -224,7 +225,20 @@ public class WebSocketServiceImpl implements WebSocketService {
                 roomMessage.setUserId(loginUserId);
                 roomMessage.setRoomId(-1L);
                 roomMessage.setMessageJson(JSON.toJSONString(messageDto));
+                roomMessage.setMessageId(messageDto.getMessage().getId());
                 roomMessageService.save(roomMessage);
+                break;
+            case USER_MESSAGE_REVOKE:
+                //撤回消息
+                RoomMessage roomMess = roomMessageService.getOne(new LambdaQueryWrapper<RoomMessage>()
+                        .eq(RoomMessage::getMessageId, chatMessageVo.getContent()));
+                if (roomMess != null && roomMess.getUserId() == loginUserId) {
+                    roomMessageService.removeById(roomMess.getId());
+                }
+                //发送撤回消息
+                sendToAllOnline(WSBaseResp.builder()
+                        .type(MessageTypeEnum.USER_MESSAGE_REVOKE.getType())
+                        .data(chatMessageVo.getContent()).build());
                 break;
             case CREATE_CHESS_ROOM:
                 //创建棋局房间

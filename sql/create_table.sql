@@ -68,21 +68,21 @@ create table if not exists post_favour
 
 
 -- 热点表
-drop table  hot_post;
+drop table hot_post;
 create table if not exists hot_post
 (
-    id         bigint auto_increment comment 'id' primary key,
-    name      varchar(256)                       null comment '排行榜名称',
-    type      varchar(256)                       null comment ' 热点类型',
-    typeName      varchar(256)                       null comment ' 热点类型名称',
-    iconUrl    varchar(512)                               null comment '图标地址',
-    hostJson        mediumtext                      null comment '热点数据（json）',
+    id             bigint auto_increment comment 'id' primary key,
+    name           varchar(256)                            null comment '排行榜名称',
+    type           varchar(256)                            null comment ' 热点类型',
+    typeName       varchar(256)                            null comment ' 热点类型名称',
+    iconUrl        varchar(512)                            null comment '图标地址',
+    hostJson       mediumtext                              null comment '热点数据（json）',
     category       int                                     null comment '分类',
     updateInterval decimal(7, 2) default 0.50              null comment '更新间隔，以小时为单位',
-    sort   int      default 0                 not null comment ' 排序',
-    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
-    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    isDelete   tinyint  default 0                 not null comment '是否删除',
+    sort           int           default 0                 not null comment ' 排序',
+    createTime     datetime      default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime     datetime      default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete       tinyint       default 0                 not null comment '是否删除',
     index idx_postId (sort)
 ) comment '热点表' collate = utf8mb4_unicode_ci;
 
@@ -91,7 +91,7 @@ create table if not exists todo
 (
     id         bigint auto_increment comment 'id' primary key,
     userId     bigint                             not null comment '用户 id',
-    todoJson      mediumtext                       null comment '待办数据（json）',
+    todoJson   mediumtext                         null comment '待办数据（json）',
     createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     isDelete   tinyint  default 0                 not null comment '是否删除'
@@ -100,11 +100,12 @@ create table if not exists todo
 -- 房间消息表
 create table if not exists room_message
 (
-    id         bigint auto_increment comment 'id' primary key,
-    userId     bigint                             not null comment '用户 id',
-    roomId     bigint                             not null comment '房间 id',
-    messageJson      mediumtext                       null comment '消息 Json 数据（json）',
-    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
-    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    isDelete   tinyint  default 0                 not null comment '是否删除'
+    id          bigint auto_increment comment 'id' primary key,
+    userId      bigint                             not null comment '用户 id',
+    messageId   varchar(128)                       null comment '消息唯一标识',
+    roomId      bigint                             not null comment '房间 id',
+    messageJson mediumtext                         null comment '消息 Json 数据（json）',
+    createTime  datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime  datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete    tinyint  default 0                 not null comment '是否删除'
 ) comment '房间消息表' collate = utf8mb4_unicode_ci;

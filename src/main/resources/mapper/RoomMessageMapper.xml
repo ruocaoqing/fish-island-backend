@@ -9,13 +9,14 @@
             <result property="userId" column="userId" />
             <result property="roomId" column="roomId" />
             <result property="messageJson" column="messageJson" />
+            <result property="messageId" column="messageId" />
             <result property="createTime" column="createTime" />
             <result property="updateTime" column="updateTime" />
             <result property="isDelete" column="isDelete" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,userId,roomId,messageJson,createTime,updateTime,
+        id,userId,roomId,messageJson,messageId,createTime,updateTime,
         isDelete
     </sql>
 </mapper>

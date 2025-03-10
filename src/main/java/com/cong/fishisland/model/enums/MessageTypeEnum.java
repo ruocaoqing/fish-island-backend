@@ -24,7 +24,8 @@ public enum MessageTypeEnum {
     JOIN_SUCCESS("joinSuccess", "成功加入房间"),
     CHAT("chat", "群聊天消息"),
     USER_ONLINE("userOnline", "用户上线"),
-    USER_OFFLINE("userOffline", "用户下单");
+    USER_OFFLINE("userOffline", "用户下单"),
+    USER_MESSAGE_REVOKE("userMessageRevoke", "用户撤回消息");
 
     private final String type;
     private final String desc;

@@ -39,6 +39,12 @@ public class RoomMessage {
     private String messageJson;
 
     /**
+     * 消息唯一标识
+     */
+    @TableField(value = "messageId")
+    private String messageId;
+
+    /**
      * 创建时间
      */
     @TableField(value = "createTime")
