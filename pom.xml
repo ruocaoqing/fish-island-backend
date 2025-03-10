@@ -20,6 +20,12 @@
         <netty-all.version>4.1.76.Final</netty-all.version>
     </properties>
     <dependencies>
+        <!-- https://github.com/toolgood/ToolGood.Words/tree/master/java/toolgood.words 敏感词-->
+        <dependency>
+            <groupId>io.github.toolgood</groupId>
+            <artifactId>toolgood-words</artifactId>
+            <version>3.0.3.1</version>
+        </dependency>
         <!-- 接入滑动验证 -->
         <dependency>
             <groupId>com.anji-plus</groupId>

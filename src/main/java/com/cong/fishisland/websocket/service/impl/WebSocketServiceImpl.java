@@ -17,6 +17,7 @@ import com.cong.fishisland.model.entity.chat.RoomMessage;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.MessageTypeEnum;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
+import com.cong.fishisland.model.ws.request.Message;
 import com.cong.fishisland.model.ws.request.MessageWrapper;
 import com.cong.fishisland.model.ws.request.WSBaseReq;
 import com.cong.fishisland.model.ws.response.UserChatResponse;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
+import toolgood.words.StringSearch;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +59,7 @@ public class WebSocketServiceImpl implements WebSocketService {
      * 所需服务
      */
     private final UserService userService;
+    private final StringSearch wordsUtil;
     private final UserCache userCache;
     @Qualifier(ThreadPoolConfig.WS_EXECUTOR)
     private final ThreadPoolTaskExecutor threadPoolTaskExecutor;
@@ -208,6 +211,11 @@ public class WebSocketServiceImpl implements WebSocketService {
         switch (messageTypeEnum) {
             case CHAT:
                 MessageWrapper messageDto = JSON.parseObject(chatMessageVo.getContent(), MessageWrapper.class);
+                Message message = messageDto.getMessage();
+                //敏感词替换
+                String resultContent = wordsUtil.Replace(message.getContent());
+                message.setContent(resultContent);
+
                 sendToAllOnline(WSBaseResp.builder()
                         .type(MessageTypeEnum.CHAT.getType())
                         .data(messageDto).build(), loginUserId);
