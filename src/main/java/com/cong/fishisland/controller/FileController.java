@@ -10,6 +10,7 @@ import com.cong.fishisland.manager.CosManager;
 import com.cong.fishisland.model.dto.file.UploadFileRequest;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.FileUploadBizEnum;
+import com.cong.fishisland.model.vo.file.CosCredentialVo;
 import com.cong.fishisland.service.UserService;
 import java.io.File;
 import java.util.Arrays;
@@ -18,10 +19,7 @@ import javax.annotation.Resource;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -39,6 +37,12 @@ public class FileController {
 
     @Resource
     private CosManager cosManager;
+//
+//    @GetMapping("/cos/credential")
+//    @ApiOperation(value = "获取cos临时凭证")
+//    public BaseResponse<CosCredentialVo> getCosCredential(String fileName) {
+//        return ResultUtils.success(cosManager.getCredential(fileName));
+//    }
 
     /**
      * 上传文件
