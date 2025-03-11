@@ -37,12 +37,12 @@ public class FileController {
 
     @Resource
     private CosManager cosManager;
-//
-//    @GetMapping("/cos/credential")
-//    @ApiOperation(value = "获取cos临时凭证")
-//    public BaseResponse<CosCredentialVo> getCosCredential(String fileName) {
-//        return ResultUtils.success(cosManager.getCredential(fileName));
-//    }
+
+    @GetMapping("/cos/credential")
+    @ApiOperation(value = "获取cos临时凭证")
+    public BaseResponse<CosCredentialVo> getCosCredential(String fileName) {
+        return ResultUtils.success(cosManager.getCredential(fileName));
+    }
 
     /**
      * 上传文件
