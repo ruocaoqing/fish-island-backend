@@ -19,4 +19,7 @@ public class Message {
 
     @JsonProperty("timestamp")
     private String timestamp;
+
+    @JsonProperty("quotedMessage")
+    private Message quotedMessage;
 }
