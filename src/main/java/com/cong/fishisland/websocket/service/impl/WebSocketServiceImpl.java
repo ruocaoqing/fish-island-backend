@@ -94,8 +94,15 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void handleLoginReq(Channel channel) {
         try {
             String token = NettyUtil.getAttr(channel, NettyUtil.TOKEN);
+            if (token == null) {
+                return;
+            }
+            Object loginIdByToken = StpUtil.getLoginIdByToken(token);
+            if (loginIdByToken == null) {
+                return;
+            }
             //更新上线列表
-            online(channel, Long.valueOf(StpUtil.getLoginIdByToken(token).toString()));
+            online(channel, Long.valueOf((String) loginIdByToken));
             User loginUser = userService.getLoginUser(token);
             //发送用户上线事件
             boolean online = userCache.isOnline(loginUser.getId());
