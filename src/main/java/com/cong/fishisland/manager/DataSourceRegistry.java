@@ -1,6 +1,6 @@
 package com.cong.fishisland.manager;
 
-import com.cong.fishisland.datasource.*;
+import com.cong.fishisland.datasource.hostpost.*;
 import com.cong.fishisland.model.enums.HotDataKeyEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

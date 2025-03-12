@@ -1,4 +1,4 @@
-package com.cong.fishisland.datasource;
+package com.cong.fishisland.datasource.hostpost;
 
 import com.alibaba.fastjson.JSON;
 import com.cong.fishisland.model.entity.hot.HotPost;
@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,18 +23,19 @@ import java.util.stream.Collectors;
  * @author shing
  */
 @Slf4j
-//@Component
-public class HuPuDataSource implements DataSource {
+@Component
+public class HuPuStreetDataSource implements DataSource {
 
-    private static final String HUPU_URL = "https://hupu.com";
+    private static final String HUPU_URL = "https://bbs.hupu.com";
     private static final String USER_AGENT = "Mozilla/5.0(Windows NT 10.0;Win64;x64;rv:66.0)Gecko/20100101 Firefox/66.0";
+    String hupuStreetURL = "https://bbs.hupu.com/all-gambia";
 
     @Override
     public HotPost getHotPost() {
-        Document document = fetchDocument();
+        Document document = fetchDocument(hupuStreetURL);
 
         if (document == null) {
-            log.error("无法获取虎扑网页内容");
+            log.error("无法获取虎扑步行街网页内容");
             return HotPost.builder().build();
         }
 
@@ -48,30 +50,31 @@ public class HuPuDataSource implements DataSource {
         }
 
         return HotPost.builder()
-                .name("虎扑热搜")
                 .sort(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
+                .name("虎扑步行街热榜")
                 .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://hupu.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList.stream()
                         .sorted((a, b) -> b.getFollowerCount() - a.getFollowerCount()).collect(Collectors.toList())
                         .subList(0, Math.min(dataList.size(), 20))))
-                .typeName("虎扑")
+                .typeName("虎扑步行街")
                 .build();
     }
 
     /**
      * 抓取网页内容
      *
+     * @param url 网页 URL
      * @return Document 返回网页的 Document 对象
      */
-    private Document fetchDocument() {
+    private Document fetchDocument(String url) {
         try {
-            return Jsoup.connect(HuPuDataSource.HUPU_URL)
+            return Jsoup.connect(url)
                     .userAgent(USER_AGENT)
                     .get();
         } catch (IOException e) {
-            log.error("获取网页内容失败，URL: " + HuPuDataSource.HUPU_URL, e);
+            log.error("获取网页内容失败，URL: " + url, e);
             return null;
         }
     }
@@ -84,9 +87,16 @@ public class HuPuDataSource implements DataSource {
      */
     private HotPostDataVO extractPostData(Element listItem) {
         try {
-            String postUrl = listItem.select("a.list-item-title").attr("href");
-            String title = listItem.select("div.item-title-conent").text();
-            Integer hot = parseHot(listItem.select("div.list-item-lights").text());
+            String postUrl = listItem.select("a").attr("href");
+            // 只有当 postUrl 为相对路径且有效时，才进行拼接并处理
+            if (postUrl.trim().isEmpty() || postUrl.equals(hupuStreetURL)) {
+                return null;
+            }
+            // 拼接完整的帖子 URL
+            postUrl = HUPU_URL + postUrl;
+
+            String title = listItem.select("span.t-title").text();
+            Integer hot = parseHot(listItem.select("span.t-lights").text());
 
             return HotPostDataVO.builder()
                     .title(title)
@@ -110,12 +120,12 @@ public class HuPuDataSource implements DataSource {
             return 0;
         }
         try {
-            // 使用正则去除所有非数字字符
+            // 使用正则去除非数字字符
             String numericHotStr = hotStr.replaceAll("\\D", "").trim();
-            // 如果处理后的字符串不为空，则转换为整数并乘以 1000
-            return numericHotStr.isEmpty() ? 0 : Integer.parseInt(numericHotStr) * 1000;
+            // 转换为整数并乘以 1000
+            return Integer.parseInt(numericHotStr) * 1000;
         } catch (NumberFormatException e) {
-            log.error("解析热度数据失败: " + hotStr, e);
+            log.error("解析热度数据失败: {}", hotStr, e);
             return 0;
         }
     }

@@ -1,4 +1,4 @@
-package com.cong.fishisland.datasource;
+package com.cong.fishisland.datasource.hostpost;
 
 import com.cong.fishisland.model.entity.hot.HotPost;
 
