@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,16 @@ import java.util.concurrent.TimeUnit;
 public class RedisUtils {
 
     private static StringRedisTemplate stringRedisTemplate;
+
+    public static void inc(String speakKey, Duration expireDuration) {
+        stringRedisTemplate.opsForValue().increment(speakKey);
+        stringRedisTemplate.expire(speakKey, expireDuration);
+    }
+
+    public static Boolean setIfAbsent(String signKey, String number, Duration duration) {
+        Boolean success = stringRedisTemplate.opsForValue().setIfAbsent(signKey, number, duration);
+        return Boolean.TRUE.equals(success);
+    }
 
     @PostConstruct
     public void init() {
@@ -45,9 +56,14 @@ public class RedisUtils {
         return stringRedisTemplate.execute(redisScript, Collections.singletonList(key), String.valueOf(unit.toSeconds(time)));
     }
 
+    public static Boolean hasKey(String key) {
+        return stringRedisTemplate.hasKey(key);
+    }
+
     public static Boolean zIsMember(String key, Object value) {
         return Objects.nonNull(stringRedisTemplate.opsForZSet().score(key, value.toString()));
     }
+
     public static void zRemove(String key, Object value) {
         zRemove(key, value.toString());
     }
@@ -70,4 +86,13 @@ public class RedisUtils {
     public static void zAdd(String key, Object value, double score) {
         zAdd(key, value.toString(), score);
     }
+
+    public static void set(String key, String value, Duration expireDuration) {
+        stringRedisTemplate.opsForValue().set(key, value, expireDuration);
+    }
+
+    public static String get(String key) {
+        return stringRedisTemplate.opsForValue().get(key);
+    }
+
 }

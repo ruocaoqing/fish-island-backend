@@ -10,4 +10,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface UserPointsService extends IService<UserPoints> {
 
+    boolean signIn();
+
+    void addSpeakPoint(Long userId);
 }

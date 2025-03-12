@@ -12,16 +12,12 @@ import com.cong.fishisland.common.ResultUtils;
 import com.cong.fishisland.constant.UserConstant;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.common.exception.ThrowUtils;
-import com.cong.fishisland.model.dto.user.UserAddRequest;
-import com.cong.fishisland.model.dto.user.UserLoginRequest;
-import com.cong.fishisland.model.dto.user.UserQueryRequest;
-import com.cong.fishisland.model.dto.user.UserRegisterRequest;
-import com.cong.fishisland.model.dto.user.UserUpdateMyRequest;
-import com.cong.fishisland.model.dto.user.UserUpdateRequest;
+import com.cong.fishisland.model.dto.user.*;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
 import com.cong.fishisland.model.vo.user.UserVO;
+import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.service.UserService;
 
 import java.util.List;
@@ -55,6 +51,8 @@ public class UserController {
     private UserService userService;
     @Resource
     private CaptchaService captchaService;
+    @Resource
+    private UserPointsService userPointsService;
 
     // region 登录相关
 
@@ -319,5 +317,16 @@ public class UserController {
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 签到
+     *
+     * @return {@link BaseResponse }<{@link Boolean }>
+     */
+    @PostMapping("/signIn")
+    @ApiOperation(value = "签到")
+    public BaseResponse<Boolean> signIn() {
+       return ResultUtils.success(userPointsService.signIn());
     }
 }

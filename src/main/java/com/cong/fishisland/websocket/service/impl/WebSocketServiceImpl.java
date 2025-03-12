@@ -26,6 +26,7 @@ import com.cong.fishisland.model.ws.response.WSBaseResp;
 import com.cong.fishisland.service.RoomMessageService;
 import com.cong.fishisland.service.UserService;
 import com.cong.fishisland.websocket.cache.UserCache;
+import com.cong.fishisland.websocket.event.AddSpeakPointEvent;
 import com.cong.fishisland.websocket.event.UserOfflineEvent;
 import com.cong.fishisland.websocket.event.UserOnlineEvent;
 import com.cong.fishisland.websocket.service.WebSocketService;
@@ -223,7 +224,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 //敏感词替换
                 String resultContent = wordsUtil.Replace(message.getContent());
                 message.setContent(resultContent);
-
+                applicationEventPublisher.publishEvent(new AddSpeakPointEvent(this, message.getSender().getId()));
                 sendToAllOnline(WSBaseResp.builder()
                         .type(MessageTypeEnum.CHAT.getType())
                         .data(messageDto).build(), loginUserId);

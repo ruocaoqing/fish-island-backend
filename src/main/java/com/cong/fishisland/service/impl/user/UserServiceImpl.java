@@ -17,10 +17,12 @@ import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.mapper.user.UserMapper;
 import com.cong.fishisland.model.dto.user.UserQueryRequest;
 import com.cong.fishisland.model.entity.user.User;
+import com.cong.fishisland.model.entity.user.UserPoints;
 import com.cong.fishisland.model.enums.UserRoleEnum;
 import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
 import com.cong.fishisland.model.vo.user.UserVO;
+import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.service.UserService;
 import com.cong.fishisland.utils.SqlUtils;
 
@@ -51,6 +53,8 @@ import javax.annotation.Resource;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Resource
     private GitHubConfig gitHubConfig;
+    @Resource
+    private UserPointsService userPointsService;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -91,12 +95,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 if (!saveResult) {
                     throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
                 }
+                //保存积分
+                savePoints(user);
+
                 return user.getId();
             } finally {
                 // 防止内存泄漏
                 lockMap.remove(userAccount);
             }
         }
+    }
+
+    private void savePoints(User user) {
+        UserPoints userPoints = new UserPoints();
+        userPoints.setUserId(user.getId());
+        userPoints.setPoints(100);
+        userPoints.setLevel(1);
+        userPoints.setUsedPoints(0);
+        userPointsService.save(userPoints);
     }
 
     @Override
@@ -243,6 +259,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         LoginUserVO loginUserVO = new LoginUserVO();
         BeanUtils.copyProperties(user, loginUserVO);
+        UserPoints userPoints = userPointsService.getOne(new LambdaQueryWrapper<UserPoints>().eq(UserPoints::getUserId, user.getId()));
+        if (userPoints == null) {
+            return loginUserVO;
+        }
+
+        loginUserVO.setPoints(userPoints.getPoints());
+        loginUserVO.setLevel(userPoints.getLevel());
+        loginUserVO.setUsedPoints(userPoints.getUsedPoints());
+        loginUserVO.setLastSignInDate(userPoints.getLastSignInDate());
+
         return loginUserVO;
     }
 
