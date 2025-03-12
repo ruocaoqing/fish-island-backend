@@ -21,6 +21,9 @@ public class UserChatResponse {
     @ApiModelProperty(value = "用户等级")
     private Integer level;
 
+    @ApiModelProperty(value = "用户积分")
+    private Integer points;
+
     @ApiModelProperty(value = "是否是管理员")
     private Boolean isAdmin;
 

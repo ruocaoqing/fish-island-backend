@@ -17,6 +17,7 @@ import com.cong.fishisland.model.dto.ws.WSChannelExtraDTO;
 import com.cong.fishisland.model.entity.chat.RoomMessage;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.MessageTypeEnum;
+import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
 import com.cong.fishisland.model.ws.request.Message;
 import com.cong.fishisland.model.ws.request.MessageWrapper;
@@ -329,15 +330,18 @@ public class WebSocketServiceImpl implements WebSocketService {
         }
 
         User currentUser = userService.getLoginUser(NettyUtil.getAttr(channel, NettyUtil.TOKEN));
+        LoginUserVO loginUserVO = userService.getLoginUserVO(currentUser);
+
         UserChatResponse userChatResponse = new UserChatResponse();
         userChatResponse.setId(String.valueOf(currentUser.getId()));
         userChatResponse.setName(currentUser.getUserName());
         userChatResponse.setAvatar(currentUser.getUserAvatar());
         //目前为一级
-        userChatResponse.setLevel(1);
+        userChatResponse.setLevel(loginUserVO.getLevel());
         userChatResponse.setIsAdmin(currentUser.getUserRole().equals(UserConstant.ADMIN_ROLE) ?
                 Boolean.TRUE : Boolean.FALSE);
         userChatResponse.setStatus("在线");
+        userChatResponse.setPoints(loginUserVO.getPoints());
 
         WSChannelExtraDTO channelExt = getOrInitChannelExt(channel);
         channelExt.setUid(uid);
