@@ -29,7 +29,7 @@ create table if not exists user
 -- 用户积分表
 create table if not exists user_points
 (
-    user_id        BIGINT comment '用户 ID' PRIMARY KEY,
+    userId        BIGINT comment '用户 ID' PRIMARY KEY,
     points         INT          DEFAULT 100 comment '积分',     -- 初始100积分
     usedPoints     INT          DEFAULT 0 comment '已使用积分', -- 初始100积分
     level          INT          DEFAULT 1 comment '用户等级',   -- 用户等级（积分除以一百等于等级）
