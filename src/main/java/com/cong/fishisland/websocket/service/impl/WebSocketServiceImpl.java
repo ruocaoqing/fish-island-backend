@@ -21,12 +21,14 @@ import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.ws.ChatMessageVo;
 import com.cong.fishisland.model.ws.request.Message;
 import com.cong.fishisland.model.ws.request.MessageWrapper;
+import com.cong.fishisland.model.ws.request.Sender;
 import com.cong.fishisland.model.ws.request.WSBaseReq;
 import com.cong.fishisland.model.ws.response.UserChatResponse;
 import com.cong.fishisland.model.ws.response.WSBaseResp;
 import com.cong.fishisland.service.RoomMessageService;
 import com.cong.fishisland.service.UserService;
 import com.cong.fishisland.websocket.cache.UserCache;
+import com.cong.fishisland.websocket.event.AIAnswerEvent;
 import com.cong.fishisland.websocket.event.AddSpeakPointEvent;
 import com.cong.fishisland.websocket.event.UserOfflineEvent;
 import com.cong.fishisland.websocket.event.UserOnlineEvent;
@@ -229,6 +231,17 @@ public class WebSocketServiceImpl implements WebSocketService {
                 sendToAllOnline(WSBaseResp.builder()
                         .type(MessageTypeEnum.CHAT.getType())
                         .data(messageDto).build(), loginUserId);
+                //查看是否是给机器人发的
+                List<Sender> mentionedUsers = message.getMentionedUsers();
+
+                if (mentionedUsers != null && !mentionedUsers.isEmpty()) {
+                    //校验里面是否有机器人
+                    boolean isRobot = mentionedUsers.stream().anyMatch(item -> item.getId().equals(UserConstant.ROBOT_ID));
+                    if (isRobot) {
+                        applicationEventPublisher.publishEvent(new AIAnswerEvent(this, messageDto));
+                    }
+                }
+
                 //保存消息到数据库
                 RoomMessage roomMessage = new RoomMessage();
                 roomMessage.setUserId(loginUserId);

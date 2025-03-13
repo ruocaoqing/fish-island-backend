@@ -28,5 +28,10 @@ public interface UserConstant {
      */
     String BAN_ROLE = "ban";
 
+    /**
+     * 机器人 ID
+     */
+    String ROBOT_ID = "-1";
+
     // endregion
 }

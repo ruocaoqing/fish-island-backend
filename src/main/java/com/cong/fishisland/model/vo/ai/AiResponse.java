@@ -18,6 +18,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class AiResponse {
 
+    @ApiModelProperty(value = "AI 回答记录ID")
+    private String id;
+
     @ApiModelProperty(value = "AI 回答")
     private String answer;
 
