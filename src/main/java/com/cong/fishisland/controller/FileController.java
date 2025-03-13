@@ -4,23 +4,25 @@ import cn.hutool.core.io.FileUtil;
 import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.ResultUtils;
-import com.cong.fishisland.constant.FileConstant;
 import com.cong.fishisland.common.exception.BusinessException;
+import com.cong.fishisland.constant.FileConstant;
 import com.cong.fishisland.manager.CosManager;
+import com.cong.fishisland.manager.MinioManager;
 import com.cong.fishisland.model.dto.file.UploadFileRequest;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.enums.FileUploadBizEnum;
 import com.cong.fishisland.model.vo.file.CosCredentialVo;
 import com.cong.fishisland.service.UserService;
-import java.io.File;
-import java.util.Arrays;
-import javax.annotation.Resource;
-
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.Resource;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * 文件接口
@@ -37,6 +39,9 @@ public class FileController {
 
     @Resource
     private CosManager cosManager;
+
+    @Resource
+    private MinioManager minioManager;
 
     @GetMapping("/cos/credential")
     @ApiOperation(value = "获取cos临时凭证")
@@ -87,6 +92,51 @@ public class FileController {
                 }
             }
         }
+    }
+
+    @PostMapping("/minio/upload")
+    @ApiOperation(value = "Minio 文件上传")
+    public BaseResponse<String> uploadFileByMinio(@RequestPart("file") MultipartFile multipartFile,
+                                                  UploadFileRequest uploadFileRequest) {
+        String biz = uploadFileRequest.getBiz();
+        FileUploadBizEnum fileUploadBizEnum = FileUploadBizEnum.getEnumByValue(biz);
+        if (fileUploadBizEnum == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        validFile(multipartFile, fileUploadBizEnum);
+        User loginUser = userService.getLoginUser();
+        // 生成存储路径
+        String uuid = RandomStringUtils.randomAlphanumeric(8);
+        String filename = uuid + "-" + multipartFile.getOriginalFilename();
+        String filepath = String.format("%s/%s/%s", fileUploadBizEnum.getValue(), loginUser.getId(), filename);
+        try {
+            // 获取文件流
+            InputStream is = multipartFile.getInputStream();
+            String contentType = multipartFile.getContentType();
+
+            // 上传文件到 MinIO
+            minioManager.uploadObject(is, filepath, contentType);
+
+            // 返回文件名或文件URL
+            return ResultUtils.success(filename);
+        } catch (Exception e) {
+            log.error("File upload failed, filePath = " + filepath, e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "上传失败");
+        }
+    }
+
+    @GetMapping("/minio/presigned/upload")
+    @ApiOperation(value = "获取 minio 上传预签名URL")
+    public BaseResponse<String> getMinioPresigned(String fileName) {
+        String url = minioManager.generatePresignedUploadUrl(fileName);
+        return ResultUtils.success(url);
+    }
+
+    @GetMapping("/minio/Presigned/download")
+    @ApiOperation("获取 minio 下载预签名URL")
+    public BaseResponse<String> generatePresignedDownloadUrl(@RequestParam("fileName") String fileName) {
+        String url = minioManager.generatePresignedDownloadUrl(fileName);
+        return ResultUtils.success(url);
     }
 
     /**
