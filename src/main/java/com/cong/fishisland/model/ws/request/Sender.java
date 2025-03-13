@@ -14,6 +14,9 @@ public class Sender {
     @JsonProperty("avatar")
     private String avatar;
 
+    @JsonProperty("points")
+    private int points;
+
     @JsonProperty("level")
     private int level;
 

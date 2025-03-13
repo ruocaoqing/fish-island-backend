@@ -57,11 +57,24 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         UserPoints userPoints = this.getById(userId);
         userPoints.setPoints(userPoints.getPoints() + points);
         //积分除以 100去整计算等级
-        userPoints.setLevel(userPoints.getPoints() / 100);
+        userPoints.setLevel(calculateLevel(userPoints.getPoints()));
         if (isSignIn) {
             userPoints.setLastSignInDate(new Date());
         }
         this.updateById(userPoints);
+    }
+
+    public int calculateLevel(int points) {
+        // 等级分界点
+        int[] thresholds = {100, 125, 300, 600, 1100, 2100, 4100};
+        for (int i = 0; i < thresholds.length; i++) {
+            if (points < thresholds[i]) {
+                // 级别从 1 开始
+                return i + 1;
+            }
+        }
+        // 4100 以上，每 4000 分升级 1 级
+        return 7 + (points - 4100) / 4000 + 1;
     }
 
     @Override
