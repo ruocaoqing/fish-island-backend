@@ -34,4 +34,7 @@ public class Sender {
 
     @JsonProperty("region")
     private String region;
+
+    @JsonProperty("country")
+    private String country;
 }
