@@ -306,6 +306,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //获取 Token  相关参数
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
         loginUserVO.setSaTokenInfo(tokenInfo);
+
+        UserPoints userPoints = userPointsService.getOne(new LambdaQueryWrapper<UserPoints>().eq(UserPoints::getUserId, user.getId()));
+        if (userPoints == null) {
+            return loginUserVO;
+        }
+
+        loginUserVO.setPoints(userPoints.getPoints());
+        loginUserVO.setLevel(userPoints.getLevel());
+        loginUserVO.setUsedPoints(userPoints.getUsedPoints());
+        loginUserVO.setLastSignInDate(userPoints.getLastSignInDate());
         return loginUserVO;
     }
 

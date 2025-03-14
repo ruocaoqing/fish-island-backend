@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "minio")
 @Data
 public class MinioConfig {
+    private String url;
     private String endpoint;
     private String accesskey;
     private String secretKey;

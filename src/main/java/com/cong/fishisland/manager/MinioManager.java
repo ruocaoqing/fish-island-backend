@@ -1,6 +1,7 @@
 package com.cong.fishisland.manager;
 
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.config.MinioConfig;
@@ -26,21 +27,21 @@ public class MinioManager {
 
     //获取列表
     public List<String> listObjects() {
-        List<String> list=new ArrayList<>();
+        List<String> list = new ArrayList<>();
         try {
 
             ListObjectsArgs listObjectsArgs = ListObjectsArgs.builder()
                     .bucket(minioConfig.getBucketName())
                     .build();
 
-            Iterable<Result<Item>> results =minioClient.listObjects(listObjectsArgs);
+            Iterable<Result<Item>> results = minioClient.listObjects(listObjectsArgs);
             for (Result<Item> result : results) {
                 Item item = result.get();
                 log.info(item.lastModified() + ", " + item.size() + ", " + item.objectName());
                 list.add(item.objectName());
             }
-        }catch (Exception e){
-            log.error("错误："+e.getMessage());
+        } catch (Exception e) {
+            log.error("错误：" + e.getMessage());
         }
         return list;
     }
@@ -53,13 +54,13 @@ public class MinioManager {
                     .object(objectName)
                     .build();
             minioClient.removeObject(removeObjectArgs);
-        }catch (Exception e){
-            log.error("错误："+e.getMessage());
+        } catch (Exception e) {
+            log.error("错误：" + e.getMessage());
         }
     }
 
     //上传
-    public void uploadObject(InputStream is, String fileName, String contentType) {
+    public String uploadObject(InputStream is, String fileName, String contentType) {
 
         try {
             PutObjectArgs putObjectArgs = PutObjectArgs.builder()
@@ -70,14 +71,15 @@ public class MinioManager {
                     .build();
             minioClient.putObject(putObjectArgs);
             is.close();
-        }catch (Exception e){
+            return minioConfig.getUrl() + fileName;
+        } catch (Exception e) {
             log.error("MinIO 文件上传失败：{}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "MinIO 文件上传失败");
         }
     }
 
     //获取minio中地址
-    public String getObjectUrl(String objectName){
+    public String getObjectUrl(String objectName) {
         try {
             GetPresignedObjectUrlArgs getPresignedObjectUrlArgs = GetPresignedObjectUrlArgs.builder()
                     .method(Method.GET)
@@ -86,52 +88,58 @@ public class MinioManager {
                     .expiry(7, TimeUnit.DAYS)
                     .build();
             return minioClient.getPresignedObjectUrl(getPresignedObjectUrlArgs);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            log.error("错误："+e.getMessage());
+            log.error("错误：" + e.getMessage());
         }
         return "";
     }
 
     //下载minio服务的文件
-    public InputStream getObject(String objectName){
+    public InputStream getObject(String objectName) {
         try {
             GetObjectArgs getObjectArgs = GetObjectArgs.builder()
                     .bucket(minioConfig.getBucketName())
                     .object(objectName)
                     .build();
             return minioClient.getObject(getObjectArgs);
-        }catch (Exception e){
-            log.error("错误："+e.getMessage());
+        } catch (Exception e) {
+            log.error("错误：" + e.getMessage());
         }
         return null;
     }
 
     /**
-     生成上传预签名URL（PUT）
+     * 生成上传预签名URL（PUT）
+     *
      * @param fileName 文件名
      * @return 预签名URL
      */
     public String generatePresignedUploadUrl(String fileName) {
+
+        if (!StpUtil.isLogin()) {
+            return null;
+        }
         try {
-            // 安全处理文件名（防止路径遍历）
-            String safeFileName = sanitizeFileName(fileName);
+            log.info("用户：{},获取预上传文件地址{}", StpUtil.getLoginId(), fileName);
             // 生成预签名URL（PUT方法）
             return minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.PUT)
                             .bucket(minioConfig.getBucketName())
-                            .object(safeFileName)
-                            .expiry(15, TimeUnit.MINUTES) // 15分钟有效
+                            .object(System.currentTimeMillis() + "_" + fileName)
+                            // 5分钟有效
+                            .expiry(5, TimeUnit.MINUTES)
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("生成预签名URL失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成预签名URL失败");
         }
     }
 
     /**
      * 生成下载预签名URL（GET）
+     *
      * @param fileName 文件名
      * @return 预签名URL
      */
@@ -143,11 +151,12 @@ public class MinioManager {
                             .method(Method.GET)
                             .bucket(minioConfig.getBucketName())
                             .object(safeFileName)
-                            .expiry(1, TimeUnit.HOURS) // 1小时有效
+                            // 1小时有效
+                            .expiry(1, TimeUnit.HOURS)
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("生成预签名URL失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成预签名URL失败");
         }
     }
 
