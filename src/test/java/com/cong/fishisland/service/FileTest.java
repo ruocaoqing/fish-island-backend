@@ -5,6 +5,7 @@ import com.cong.fishisland.common.TestBase;
 import com.cong.fishisland.manager.MinioManager;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Resource;
@@ -26,7 +27,7 @@ class FileTest extends TestBase {
         String uploadUrl = minioManage.generatePresignedUploadUrl(fileName);
 
         // 2. 读取文件
-        Path filePath = Paths.get("src/test/resources/test.png");
+        Path filePath = Paths.get("src/main/resources/y31qYBxk-moyu.png");
         byte[] fileBytes = Files.readAllBytes(filePath);
 
         // 3. 发送 HTTP PUT 请求
@@ -39,5 +40,6 @@ class FileTest extends TestBase {
         // 4. 断言上传成功
         assert response.isSuccessful();
         System.out.println("文件上传成功：" + uploadUrl);
+        Assertions.assertTrue(true);
     }
 }

@@ -122,11 +122,12 @@ public class MinioManager {
                             .method(Method.PUT)
                             .bucket(minioConfig.getBucketName())
                             .object(safeFileName)
-                            .expiry(15, TimeUnit.MINUTES) // 15分钟有效
+                            // 5分钟有效
+                            .expiry(5, TimeUnit.MINUTES)
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException("生成预签名URL失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成预签名URL失败");
         }
     }
 
