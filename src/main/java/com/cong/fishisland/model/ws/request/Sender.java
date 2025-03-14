@@ -31,4 +31,7 @@ public class Sender {
 
     @JsonProperty("isAdmin")
     private boolean isAdmin;
+
+    @JsonProperty("region")
+    private String region;
 }
