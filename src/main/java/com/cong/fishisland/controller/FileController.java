@@ -60,7 +60,7 @@ public class FileController {
     @PostMapping("/upload")
     @ApiOperation(value = "文件上传")
     public BaseResponse<String> uploadFile(@RequestPart("file") MultipartFile multipartFile,
-            UploadFileRequest uploadFileRequest) {
+                                           UploadFileRequest uploadFileRequest) {
         String biz = uploadFileRequest.getBiz();
         FileUploadBizEnum fileUploadBizEnum = FileUploadBizEnum.getEnumByValue(biz);
         if (fileUploadBizEnum == null) {
@@ -115,10 +115,8 @@ public class FileController {
             String contentType = multipartFile.getContentType();
 
             // 上传文件到 MinIO
-            minioManager.uploadObject(is, filepath, contentType);
+            return ResultUtils.success(minioManager.uploadObject(is, filepath, contentType));
 
-            // 返回文件名或文件URL
-            return ResultUtils.success(filename);
         } catch (Exception e) {
             log.error("File upload failed, filePath = " + filepath, e);
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "上传失败");
