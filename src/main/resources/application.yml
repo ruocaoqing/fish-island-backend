@@ -5,7 +5,7 @@ spring:
     name: fish-island-backend
   # 默认 dev 环境
   profiles:
-    active: dev
+    active: local
   # 支持 swagger3
   mvc:
     pathmatch:
@@ -13,18 +13,10 @@ spring:
   # 文件上传
   servlet:
     multipart:
-      # 大小限制
-      max-file-size: 10MB
-  # 邮箱
-  mail:
-    host: smtp.qq.com  # 平台地址（这里是QQ邮箱）
-    username: 111@qq.com # 发送者邮箱
-    properties:
-      mail:
-        smtp:
-          ssl:
-            enable: true  # 启用 SSL
-    default-encoding: UTF-8  # 编码格式
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+
 server:
   address: 0.0.0.0
   port: 8123

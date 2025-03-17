@@ -8,7 +8,6 @@ public interface FileConstant {
 
     /**
      * COS 访问地址
-     * todo 需替换配置
      */
-    String COS_HOST = "https://cong.icu";
+    String COS_HOST = "https://codebug-1309318075.cos.ap-shanghai.myqcloud.com";
 }
