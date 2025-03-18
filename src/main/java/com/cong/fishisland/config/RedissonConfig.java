@@ -18,6 +18,8 @@ public class RedissonConfig {
 
     private int port;
 
+    private String username;
+
     private String password;
 
     @Bean
@@ -27,6 +29,7 @@ public class RedissonConfig {
 
         config.useSingleServer()
                 .setAddress(redisAddress)
+                .setUsername(username)
                 .setPassword(password != null && !password.isEmpty() ? password : null)
                 .setConnectionPoolSize(10)
                 .setConnectionMinimumIdleSize(2);

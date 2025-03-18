@@ -65,11 +65,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     StringRedisTemplate stringRedisTemplate;
+    private static final String EMAIL_CODE_PREFIX = "email:code:";
 
     @Resource
     private RedissonClient redissonClient;
 
-    private static final String EMAIL_CODE_PREFIX = "email:code:";
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -214,9 +214,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         try {
             // 发送验证码邮件
-            String sendCode = emailManager.sendVerificationCode(email);
-            // 存入 Redis，1 分钟有效
-            stringRedisTemplate.opsForValue().set(EMAIL_CODE_PREFIX + email, sendCode, 1, TimeUnit.MINUTES);
+            emailManager.sendVerificationCode(email);
+
             return true;
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "邮件发送失败，请检查邮箱是否有效");

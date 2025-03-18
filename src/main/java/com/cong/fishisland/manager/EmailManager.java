@@ -4,13 +4,16 @@ import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.mail.internet.MimeMessage;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -19,20 +22,25 @@ public class EmailManager {
     @Resource
     private JavaMailSender mailSender;
 
+    @Resource
+    StringRedisTemplate stringRedisTemplate;
+    private static final String EMAIL_CODE_PREFIX = "email:code:";
+
     @Value("${spring.mail.username}")
     private String from;
 
     /**
      * 发送验证码邮件
+     *
      * @param sendEmail 接收邮箱
-     * @return 发送的验证码
      */
-    public String sendVerificationCode(String sendEmail) {
+    @Async
+    public void sendVerificationCode(String sendEmail) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
 
-            // 使用MimeMessageHelper来构建邮件
-            MimeMessageHelper mailMessage = new MimeMessageHelper(mimeMessage, true); // true表示支持HTML
+            // 使用MimeMessageHelper来构建邮件 true表示支持HTM
+            MimeMessageHelper mailMessage = new MimeMessageHelper(mimeMessage, true);
             // 主题
             mailMessage.setSubject("【摸鱼岛】验证码邮件");
             // 生成6位随机验证码
@@ -58,9 +66,10 @@ public class EmailManager {
             mailMessage.setFrom(from);
             // 发送邮件
             mailSender.send(mimeMessage);
-            return code;
+            // 存入 Redis，1 分钟有效
+            stringRedisTemplate.opsForValue().set(EMAIL_CODE_PREFIX + sendEmail, code, 1, TimeUnit.MINUTES);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("邮件发送失败", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "邮件发送失败");
         }
     }
