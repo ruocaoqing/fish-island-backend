@@ -36,7 +36,7 @@ public interface UserService extends IService<User> {
      * @param checkPassword 校验密码
      * @return 新用户 id
      */
-    long userEmilRegister(String email, String userPassword, String checkPassword, String code);
+    long userEmilRegister(String userAccount,String email, String userPassword, String checkPassword, String code);
 
     /**
      * 用户邮箱发验证码

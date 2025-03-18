@@ -64,6 +64,7 @@ public class UserController {
      */
     @PostMapping("/register")
     @ApiOperation(value = "用户注册")
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -107,6 +108,7 @@ public class UserController {
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        String userAccount = userRegisterRequest.getUserAccount();
         String email = userRegisterRequest.getEmail();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
@@ -114,7 +116,7 @@ public class UserController {
         if (StringUtils.isAnyBlank(email, userPassword, checkPassword)) {
             return null;
         }
-        long result = userService.userEmilRegister(email, userPassword, checkPassword,code);
+        long result = userService.userEmilRegister(userAccount,email, userPassword, checkPassword,code);
         return ResultUtils.success(result);
     }
 
