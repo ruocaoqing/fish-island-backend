@@ -18,7 +18,8 @@ spring:
   # 邮箱
   mail:
     host: smtp.qq.com  # 平台地址（这里是QQ邮箱）
-    username: 111@qq.com # 发送者邮箱
+    username: Youremail@qq.com # 邮箱
+    password: YouremailPassword  # 授权码
     properties:
       mail:
         smtp:

@@ -1,7 +1,5 @@
 package com.cong.fishisland.service.impl.user;
 
-import static com.cong.fishisland.constant.SystemConstants.SALT;
-
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -32,6 +30,10 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RRateLimiter;
+import org.redisson.api.RateIntervalUnit;
+import org.redisson.api.RateType;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.cong.fishisland.constant.SystemConstants.SALT;
 
 /**
  * 用户服务实现
@@ -61,6 +65,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private RedissonClient redissonClient;
 
     private static final String EMAIL_CODE_PREFIX = "email:code:";
 
@@ -123,21 +130,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 用户id
      */
     @Override
-    public long userEmilRegister(String email, String userPassword, String checkPassword, String code) {
+    public long userEmilRegister(String userAccount, String email, String userPassword, String checkPassword, String code) {
 
         String EMAIL_REGISTER_LOCK = "email:register:lock:";
+
+        String RATE_LIMITER_KEY = "email:register:rate_limiter";
 
         // 校验参数
         if (StringUtils.isAnyBlank(email, code, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
         }
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
-        }
+        // 校验邮箱格式
+        validateEmailFormat(email);
+
         if (!userPassword.equals(checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次密码输入不一致");
         }
 
+        // 使用 Redisson 限流，一分钟最多 10 次
+        RRateLimiter rateLimiter = redissonClient.getRateLimiter(RATE_LIMITER_KEY);
+        rateLimiter.trySetRate(RateType.OVERALL, 10, 1, RateIntervalUnit.MINUTES);
+        if (!rateLimiter.tryAcquire()) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系统繁忙，请稍后再试");
+        }
         // 获取分布式锁，防止并发注册
         String lockKey = EMAIL_REGISTER_LOCK + email;
         Boolean isLocked = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, "1", 10, TimeUnit.SECONDS);
@@ -167,7 +182,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 插入数据
             User user = new User();
             user.setEmail(email);
-            user.setUserAccount("邮箱用户" + email);
+            user.setUserAccount(StringUtils.isNotBlank(userAccount) ? userAccount : "邮箱用户" + email);
             user.setUserPassword(encryptPassword);
             boolean saveResult = this.save(user);
             if (!saveResult) {
@@ -185,22 +200,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean userEmailSend(String email) {
         // 校验邮箱格式
-        if (StringUtils.isBlank(email) || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
+        validateEmailFormat(email);
+
+        // 邮箱不能重复
+        boolean emailExists = this.baseMapper.selectCount(new QueryWrapper<User>().eq("email", email)) > 0;
+        if (emailExists) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该邮箱已注册，无法发送验证码");
         }
         // 检查 Redis 是否已有验证码，防止频繁发送
         String existingCode = stringRedisTemplate.opsForValue().get(EMAIL_CODE_PREFIX + email);
         if (StringUtils.isNotBlank(existingCode)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已发送，请稍后再试");
         }
-        // 发送验证码邮件
-        String sendCode = emailManager.sendVerificationCode(email);
-        // 存入 Redis，秒有效
-        stringRedisTemplate.opsForValue().set(EMAIL_CODE_PREFIX + email, sendCode, 1, TimeUnit.MINUTES);
-        String redisKey = EMAIL_CODE_PREFIX + email;
-        log.info("尝试写入 Redis 的键: {}", redisKey);
-        log.info("验证码已发送至邮箱：" + email);
-        return true;
+        try {
+            // 发送验证码邮件
+            String sendCode = emailManager.sendVerificationCode(email);
+            // 存入 Redis，1 分钟有效
+            stringRedisTemplate.opsForValue().set(EMAIL_CODE_PREFIX + email, sendCode, 1, TimeUnit.MINUTES);
+            return true;
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "邮件发送失败，请检查邮箱是否有效");
+        }
     }
 
     private void savePoints(User user) {
@@ -244,9 +264,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 用户通过邮箱登录
+     *
      * @param email        邮箱
      * @param userPassword 用户密码
-     * @return
      */
     @Override
     public LoginUserVO userEmailLogin(String email, String userPassword) {
@@ -255,9 +275,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         // 校验邮箱格式
-        if (StringUtils.isBlank(email) || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
-        }
+        validateEmailFormat(email);
         if (userPassword.length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
         }
@@ -490,5 +508,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUserName(authUser.getNickname());
         user.setUserRole(UserRoleEnum.USER.getValue());
         this.save(user);
+    }
+
+    /**
+     * 校验邮箱格式
+     *
+     * @param email 邮箱地址
+     */
+    private void validateEmailFormat(String email) {
+        if (StringUtils.isBlank(email) || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
+        }
     }
 }
