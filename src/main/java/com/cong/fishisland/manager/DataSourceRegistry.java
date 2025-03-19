@@ -31,6 +31,7 @@ public class DataSourceRegistry {
     private final WYCloudDataSource wyCloudDataSource;
     private final CsdnDataSource csdnDataSource;
     private final JueJinDataSource jueJinDataSource;
+    private final SmzdmDataSource smzdmDataSource;
 
 
     @PostConstruct
@@ -45,6 +46,7 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.DOU_YIN.getValue(), douYinDataSource);
             put(HotDataKeyEnum.CS_DN.getValue(), csdnDataSource);
             put(HotDataKeyEnum.JUE_JIN.getValue(), jueJinDataSource);
+            put(HotDataKeyEnum.SM_ZDM.getValue(), smzdmDataSource);
         }};
     }
 
