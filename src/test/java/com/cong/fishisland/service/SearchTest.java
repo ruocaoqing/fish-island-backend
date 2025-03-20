@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.common.TestBaseByLogin;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import com.cong.fishisland.utils.StringUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -27,10 +28,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -276,8 +274,50 @@ class SearchTest extends TestBaseByLogin {
             });
 
         } catch (Exception e) {
-            log.error("获取微博热搜失败", e);
+            log.error("获取网易云热搜失败", e);
         }
+    }
+
+    @Test
+    void smzdmTest() throws IOException {
+        String smzdmUrl = "https://www.smzdm.com/top/";
+        Document document = Jsoup.connect(smzdmUrl)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0")
+                .get();
+
+        Elements items = document.select(".feed-hot-card");
+        List<Map<String, String>> productList = new ArrayList<>();
+
+        for (Element item : items) {
+            String position = item.attr("data-position");
+            Element link = item.select("a[target=_blank]").first();
+            if (link == null) continue;
+            String title = link.select(".feed-hot-title").text();
+            String url = link.attr("href");
+            String onclickData = link.attr("onclick");
+            String floor = "";
+            if (onclickData.contains("'floor':'好价品类榜'")) {
+                floor = "好价品类榜";
+            }
+            if ("好价品类榜".equals(floor)) {
+                Map<String, String> product = new HashMap<>();
+                product.put("title", title);
+                product.put("url", url);
+                product.put("position", position);
+                productList.add(product);
+            }
+        }
+        productList.sort((p1, p2) ->
+                Integer.compare(
+                        Integer.parseInt(p1.get("position")),
+                        Integer.parseInt(p2.get("position"))
+                )
+        );
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(productList);
+        System.out.println(jsonOutput);
+        
     }
 
 }

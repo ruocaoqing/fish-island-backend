@@ -24,7 +24,8 @@ public enum HotDataKeyEnum {
     WY_CLOUD_MUSIC("网易云音乐", "WyCloudMusic"),
     DOU_YIN("抖音", "DouYin"),
     CS_DN("csdn", "CSDN"),
-    JUE_JIN("掘金", "JueJin");
+    JUE_JIN("掘金", "JueJin"),
+    SM_ZDM("什么值得买", "SmZdm");
 
 
     private final String text;
