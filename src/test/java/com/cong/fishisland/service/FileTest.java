@@ -42,4 +42,36 @@ class FileTest extends TestBase {
         System.out.println("文件上传成功：" + uploadUrl);
         Assertions.assertTrue(true);
     }
+
+    @Test
+    void test111666ImageUpload() throws IOException {
+        // 1. 读取本地文件
+        Path filePath = Paths.get("src/main/resources/y31qYBxk-moyu.png");
+        byte[] fileBytes = Files.readAllBytes(filePath);
+
+        // 2. 创建 OkHttpClient
+        OkHttpClient client = new OkHttpClient();
+
+        // 3. 创建请求体
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("image", "test.png",
+                        RequestBody.create(MediaType.parse("image/png"), fileBytes))
+                .build();
+
+        // 4. 创建请求
+        Request request = new Request.Builder()
+                .url("https://i.111666.best/image")
+                .addHeader("Auth-Token", "YOUR-TOKEN")
+                .post(requestBody)
+                .build();
+
+        // 5. 发送请求
+        try (Response response = client.newCall(request).execute()) {
+            // 6. 验证响应
+            Assertions.assertTrue(response.isSuccessful(), "上传失败：" + response.code());
+            String responseBody = response.body().string();
+            log.info("上传成功，响应内容：{}", responseBody);
+        }
+    }
 }

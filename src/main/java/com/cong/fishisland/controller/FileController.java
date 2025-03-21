@@ -1,6 +1,7 @@
 package com.cong.fishisland.controller;
 
 import cn.hutool.core.io.FileUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.ResultUtils;
@@ -15,12 +16,16 @@ import com.cong.fishisland.model.vo.file.CosCredentialVo;
 import com.cong.fishisland.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.*;
+import okhttp3.RequestBody;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -137,6 +142,47 @@ public class FileController {
         return ResultUtils.success(url);
     }
 
+    @PostMapping("/111666/upload")
+    @ApiOperation(value = "上传图片到111666.best")
+    public BaseResponse<String> uploadTo111666(@RequestPart("file") MultipartFile multipartFile) {
+        try {
+            // 1. 校验文件
+            // 2. 创建 OkHttpClient
+            OkHttpClient client = new OkHttpClient();
+
+            // 3. 创建请求体
+            RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("image", multipartFile.getOriginalFilename(),
+                            RequestBody.create(MediaType.parse(multipartFile.getContentType()), multipartFile.getBytes()))
+                    .build();
+
+            // 4. 创建请求
+            Request request = new Request.Builder()
+                    .url("https://i.111666.best/image")
+                    //时间戳
+                    .addHeader("Auth-Token", String.valueOf(System.currentTimeMillis()))
+                    .post(requestBody)
+                    .build();
+
+            // 5. 发送请求
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "上传失败：" + response.code());
+                }
+                String responseBody = response.body().string();
+                log.info("上传成功，响应内容：{}", responseBody);
+                //获取 src 字段
+                JSONObject jsonObject = JSONObject.parseObject(responseBody);
+                String src = jsonObject.getString("src");
+                return ResultUtils.success("https://i.111666.best" + src);
+            }
+        } catch (IOException e) {
+            log.error("文件上传失败", e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "上传失败：" + e.getMessage());
+        }
+    }
+
     /**
      * 校验文件
      *
@@ -154,7 +200,7 @@ public class FileController {
             if (fileSize > oneM) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不能超过 1M");
             }
-            if (!Arrays.asList("jpeg", "jpg", "svg", "png", "webp").contains(fileSuffix)) {
+            if (!Arrays.asList("jpeg", "jpg", "svg", "png", "webp","gif").contains(fileSuffix)) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型错误");
             }
         }
