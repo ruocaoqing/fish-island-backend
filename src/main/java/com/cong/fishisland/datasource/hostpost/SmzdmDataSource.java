@@ -67,9 +67,9 @@ public class SmzdmDataSource implements DataSource {
         }
 
         return HotPost.builder()
-                .sort(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
+                .sort(CategoryTypeEnum.GOODS_SHARE.getValue())
                 .name("什么值得买热榜")
-                .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
+                .category(CategoryTypeEnum.GOODS_SHARE.getValue())
                 .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
                 .iconUrl("https://www.smzdm.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))

@@ -19,7 +19,8 @@ public enum CategoryTypeEnum {
     GENERAL_DISCUSSION("综合资讯 & 讨论社区", 1),
     TECH_PROGRAMMING("技术 & 编程", 2),
     VIDEO_ENTERTAINMENT("视频 & 娱乐", 3),
-    MUSIC_HOT("音乐热榜", 4);
+    MUSIC_HOT("音乐热榜", 4),
+    GOODS_SHARE("好物分享", 5);
 
 
     private final String text;
