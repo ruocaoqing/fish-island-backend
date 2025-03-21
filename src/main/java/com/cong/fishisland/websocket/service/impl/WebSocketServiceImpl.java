@@ -218,6 +218,7 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     private void sendByType(ChatMessageVo chatMessageVo, String token, Long uid, Channel channel) {
         long loginUserId = Long.parseLong(StpUtil.getLoginIdByToken(token).toString());
+        User loginUser = userService.getLoginUser(token);
         MessageTypeEnum messageTypeEnum = MessageTypeEnum.of(chatMessageVo.getType());
         //发送消息
         switch (messageTypeEnum) {
@@ -254,13 +255,15 @@ public class WebSocketServiceImpl implements WebSocketService {
                 //撤回消息
                 RoomMessage roomMess = roomMessageService.getOne(new LambdaQueryWrapper<RoomMessage>()
                         .eq(RoomMessage::getMessageId, chatMessageVo.getContent()));
-                if (roomMess != null && roomMess.getUserId() == loginUserId) {
+                if ((roomMess != null && roomMess.getUserId() == loginUserId) || loginUser.getUserRole()
+                        .equals(UserConstant.ADMIN_ROLE)) {
                     roomMessageService.removeById(roomMess.getId());
+                    //发送撤回消息
+                    sendToAllOnline(WSBaseResp.builder()
+                            .type(MessageTypeEnum.USER_MESSAGE_REVOKE.getType())
+                            .data(chatMessageVo.getContent()).build());
                 }
-                //发送撤回消息
-                sendToAllOnline(WSBaseResp.builder()
-                        .type(MessageTypeEnum.USER_MESSAGE_REVOKE.getType())
-                        .data(chatMessageVo.getContent()).build());
+
                 break;
             case CREATE_CHESS_ROOM:
                 //创建棋局房间
@@ -359,7 +362,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         WSChannelExtraDTO channelExt = getOrInitChannelExt(channel);
         channelExt.setUid(uid);
         channelExt.setUserChatResponse(userChatResponse);
-        ONLINE_UID_MAP.putIfAbsent(uid, new CopyOnWriteArrayList<>());
+        CopyOnWriteArrayList<Channel> arrayList = new CopyOnWriteArrayList<>();
+        arrayList.add(channel);
+        ONLINE_UID_MAP.putIfAbsent(uid, arrayList);
         WSChannelExtraDTO wsChannelExtraDTO = new WSChannelExtraDTO();
         wsChannelExtraDTO.setUid(uid);
         wsChannelExtraDTO.setUserChatResponse(userChatResponse);
