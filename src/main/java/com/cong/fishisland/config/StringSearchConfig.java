@@ -36,9 +36,9 @@ public class StringSearchConfig {
     // 读取资源文件并解析成 List
     private List<String> loadKeywordsFromFile() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("key.txt")), StandardCharsets.UTF_8))) {
+                Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream("key-simple.txt")), StandardCharsets.UTF_8))) {
             return reader.lines()
-                    .flatMap(line -> Arrays.stream(line.split("\\|")))
+                    .flatMap(line -> Arrays.stream(line.split(",")))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
