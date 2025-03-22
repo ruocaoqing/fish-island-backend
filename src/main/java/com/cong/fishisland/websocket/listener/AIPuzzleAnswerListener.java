@@ -27,14 +27,14 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 机器人回答消息监听器
+ * 机器人回答消息监听器（海龟汤）
  *
  * @author zhongzb create on 2022/08/26
  */
-@Slf4j
-@Component
+//@Slf4j
+//@Component
 @RequiredArgsConstructor
-public class AIAnswerListener {
+public class AIPuzzleAnswerListener {
     private final WebSocketService webSocketService;
     private final AIChatDataSource aiChatDataSource;
     private final RoomMessageService roomMessageService;
@@ -100,7 +100,7 @@ public class AIAnswerListener {
         // 添加当前用户消息
         messages.add(new SiliconFlowRequest.Message() {{
             setRole("user");
-            setContent(message.getContent());
+            setContent(content);
         }});
 
         // 调用 AI 时临时添加系统消息

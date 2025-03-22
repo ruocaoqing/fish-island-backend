@@ -284,13 +284,10 @@ public class WebSocketServiceImpl implements WebSocketService {
 
     private void moveChess(ChatMessageVo chatMessageVo, Long uid) {
         CopyOnWriteArrayList<Channel> channels = ONLINE_UID_MAP.get(uid);
-        Map<String, Object> data = new HashMap<>();
         JSONObject message = JSON.parseObject(chatMessageVo.getContent());
-        data.put(ROOM_ID, message.get(ROOM_ID));
-        data.put("position", message.get("position"));
-        data.put("player", message.get("player"));
+        message.put(ROOM_ID, message.get(ROOM_ID));
         WSBaseResp<Object> wsBaseResp = WSBaseResp.builder()
-                .type(MessageTypeEnum.MOVE_CHESS.getType()).data(data).build();
+                .type(MessageTypeEnum.MOVE_CHESS.getType()).data(message).build();
         channels.forEach(item -> threadPoolTaskExecutor.execute(() -> sendMsg(item, wsBaseResp)));
     }
 
