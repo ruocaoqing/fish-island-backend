@@ -25,7 +25,11 @@ public enum MessageTypeEnum {
     CHAT("chat", "群聊天消息"),
     USER_ONLINE("userOnline", "用户上线"),
     USER_OFFLINE("userOffline", "用户下单"),
-    USER_MESSAGE_REVOKE("userMessageRevoke", "用户撤回消息");
+    USER_MESSAGE_REVOKE("userMessageRevoke", "用户撤回消息"),
+    CREATE_DRAW_ROOM("createDrawRoom", "创建绘画房间"),
+    ROOM_DRAW_CREATED("roomDrawCreated", "房间绘画创建成功"),
+    ROOM_DRAW_USER_LIST("roomDrawUserList", "发送你画我猜在线用户列表"),
+    ;
 
     private final String type;
     private final String desc;

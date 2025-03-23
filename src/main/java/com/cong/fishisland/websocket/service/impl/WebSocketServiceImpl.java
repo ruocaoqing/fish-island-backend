@@ -23,6 +23,7 @@ import com.cong.fishisland.model.ws.request.Message;
 import com.cong.fishisland.model.ws.request.MessageWrapper;
 import com.cong.fishisland.model.ws.request.Sender;
 import com.cong.fishisland.model.ws.request.WSBaseReq;
+import com.cong.fishisland.model.ws.response.DrawPlayer;
 import com.cong.fishisland.model.ws.response.UserChatResponse;
 import com.cong.fishisland.model.ws.response.WSBaseResp;
 import com.cong.fishisland.service.RoomMessageService;
@@ -88,6 +89,9 @@ public class WebSocketServiceImpl implements WebSocketService {
      * 所有单人在线的棋局和对应的socket
      */
     private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Channel>> CHESS_ROOM_MAP = new ConcurrentHashMap<>();
+
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Channel>> DRAW_ROOM_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<DrawPlayer>> DRAW_ROOM_PLAYER_MAP = new ConcurrentHashMap<>();
 
     @Override
     public void handleLoginReq(Channel channel) {
@@ -272,9 +276,32 @@ public class WebSocketServiceImpl implements WebSocketService {
                 //移动棋子
                 moveChess(chatMessageVo, uid);
                 break;
+            case CREATE_DRAW_ROOM:
+                createDrawRoom(channel, loginUser);
+                break;
             default:
                 break;
         }
+    }
+
+    private void createDrawRoom(Channel channel, User loginUser) {
+        //自动生成房间号
+        String roomId = String.valueOf(System.currentTimeMillis());
+        DRAW_ROOM_MAP.putIfAbsent(roomId, new CopyOnWriteArrayList<>());
+        DRAW_ROOM_MAP.get(roomId).add(channel);
+        //加入房间用户列表
+        DRAW_ROOM_PLAYER_MAP.putIfAbsent(roomId, new CopyOnWriteArrayList<>());
+        DrawPlayer drawPlayer = new DrawPlayer();
+        drawPlayer.setId(String.valueOf(loginUser.getId()));
+        drawPlayer.setUserName(loginUser.getUserName());
+        drawPlayer.setUserAvatar(loginUser.getUserAvatar());
+        DRAW_ROOM_PLAYER_MAP.get(roomId).add(drawPlayer);
+        //返回房间号
+        WSBaseResp<Object> createResp = WSBaseResp.builder().type(MessageTypeEnum.ROOM_DRAW_CREATED.getType()).data(roomId).build();
+        sendMsg(channel, createResp);
+        //发送在线列表
+        WSBaseResp<Object> createUserListResp = WSBaseResp.builder().type(MessageTypeEnum.ROOM_DRAW_USER_LIST.getType()).data(DRAW_ROOM_PLAYER_MAP.get(roomId)).build();
+        sendMsg(channel, createUserListResp);
     }
 
     private void moveChess(ChatMessageVo chatMessageVo, Long uid) {
