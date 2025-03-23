@@ -89,11 +89,6 @@ public class WebSocketServiceImpl implements WebSocketService {
      */
     private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Channel>> CHESS_ROOM_MAP = new ConcurrentHashMap<>();
 
-    /**
-     * 所有双人加入棋局和对应的socket
-     */
-    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Channel>> CHESS_ROOM_PLAYER_MAP = new ConcurrentHashMap<>();
-
     @Override
     public void handleLoginReq(Channel channel) {
         try {
@@ -255,8 +250,8 @@ public class WebSocketServiceImpl implements WebSocketService {
                 //撤回消息
                 RoomMessage roomMess = roomMessageService.getOne(new LambdaQueryWrapper<RoomMessage>()
                         .eq(RoomMessage::getMessageId, chatMessageVo.getContent()));
-                if ((roomMess != null && roomMess.getUserId() == loginUserId) || loginUser.getUserRole()
-                        .equals(UserConstant.ADMIN_ROLE)) {
+                if (roomMess != null && (roomMess.getUserId() == loginUserId
+                        || loginUser.getUserRole().equals(UserConstant.ADMIN_ROLE))) {
                     roomMessageService.removeById(roomMess.getId());
                     //发送撤回消息
                     sendToAllOnline(WSBaseResp.builder()
@@ -304,14 +299,13 @@ public class WebSocketServiceImpl implements WebSocketService {
     private void joinRoom(ChatMessageVo chatMessageVo, Channel channel, long loginUserId) {
         String joinRoomId = chatMessageVo.getContent();
         if (!CHESS_ROOM_MAP.containsKey(joinRoomId)) {
-            WSBaseResp<Object> errorResp = WSBaseResp.builder().type(MessageTypeEnum.ERROR.getType()).data("房间不存在").build();
+            WSBaseResp<Object> errorResp = WSBaseResp.builder().type(MessageTypeEnum.ERROR.getType()).data("房间不存在或已开始").build();
             sendMsg(channel, errorResp);
             return;
         }
         CopyOnWriteArrayList<Channel> channels = CHESS_ROOM_MAP.get(joinRoomId);
         CHESS_ROOM_MAP.remove(joinRoomId);
-        //开始进行的房间
-        CHESS_ROOM_PLAYER_MAP.put(joinRoomId, channels);
+
         //房主
         Channel roomOwner = channels.get(0);
         //把当前登录用户传给对方
