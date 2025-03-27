@@ -9,6 +9,7 @@ import com.cong.fishisland.common.TestBaseByLogin;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
 import com.cong.fishisland.utils.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -318,6 +319,40 @@ class SearchTest extends TestBaseByLogin {
         String jsonOutput = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(productList);
         System.out.println(jsonOutput);
         
+    }
+
+    @Test
+    void zhibo8Test() throws IOException {
+        String zhibo8Url = "https://zhibo8.com/";
+        Document document = Jsoup.connect(zhibo8Url)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0")
+                .get();
+
+        List<Map<String, String>> newsList = new ArrayList<>();
+
+        // 抓取篮球资讯
+        Elements basketballNews = document.select(".vct-box.lanqiu-news ._content a.list-item");
+        for (Element news : basketballNews) {
+            Map<String, String> newsData = new HashMap<>();
+            newsData.put("category", "basketball");
+            newsData.put("title", news.text());
+            newsData.put("url", news.attr("href"));
+            newsList.add(newsData);
+        }
+
+        // 抓取足球资讯
+        Elements footballNews = document.select(".vct-box.zuqiu-news ._content a.list-item");
+        for (Element news : footballNews) {
+            Map<String, String> newsData = new HashMap<>();
+            newsData.put("category", "football");
+            newsData.put("title", news.text());
+            newsData.put("url", news.attr("href"));
+            newsList.add(newsData);
+        }
+
+        String jsonOutput = new Gson().toJson(newsList);
+        System.out.println(jsonOutput);
+
     }
 
 }

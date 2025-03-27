@@ -32,6 +32,7 @@ public class DataSourceRegistry {
     private final CsdnDataSource csdnDataSource;
     private final JueJinDataSource jueJinDataSource;
     private final SmzdmDataSource smzdmDataSource;
+    private final ZhiBo8DataSource zhiBo8DataSource;
 
 
     @PostConstruct
@@ -47,6 +48,7 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.CS_DN.getValue(), csdnDataSource);
             put(HotDataKeyEnum.JUE_JIN.getValue(), jueJinDataSource);
             put(HotDataKeyEnum.SM_ZDM.getValue(), smzdmDataSource);
+            put(HotDataKeyEnum.ZHI_BO_8.getValue(), zhiBo8DataSource);
         }};
     }
 
