@@ -9,6 +9,9 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.JBUI;
 import com.intellij.openapi.ui.LoadingDecorator;
+import com.intellij.ui.tabs.JBTabs;
+import com.intellij.ui.tabs.TabInfo;
+import com.intellij.ui.tabs.impl.JBTabsImpl;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -37,7 +40,9 @@ public class HotNewsListPanel extends JBPanel<HotNewsListPanel> implements Dispo
     private final JList<String> platformList;
     private final DefaultListModel<String> platformListModel;
     private final LoadingDecorator loadingDecorator;
-    private javax.swing.Timer loadingTimer;  // 添加加载动画定时器变量
+    private javax.swing.Timer loadingTimer;
+    private final JBTabs tabs;
+    private final HotNewsPreviewPanel fishPanel;
 
     public HotNewsListPanel(Project project) {
         super(new BorderLayout());
@@ -45,20 +50,74 @@ public class HotNewsListPanel extends JBPanel<HotNewsListPanel> implements Dispo
         this.hotNewsService = new HotNewsService();
         this.setBorder(JBUI.Borders.empty(10));
 
-        // 创建主分割面板（左侧平台列表和右侧内容）
+        // 初始化组件
+        platformListModel = new DefaultListModel<>();
+        platformList = new JList<>(platformListModel);
+        newsTableModel = new DefaultTableModel(new String[]{"序号", "标题", "关注数"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        newsTable = new JBTable(newsTableModel);
+        previewPanel = new HotNewsPreviewPanel(project);
+        loadingDecorator = new LoadingDecorator(previewPanel, this, 0);
         mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        contentSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        fishPanel = new HotNewsPreviewPanel(project);
+        tabs = new JBTabsImpl(project);
+
+        // 创建标签页
+        JBPanel hotNewsPanel = createHotNewsPanel();
+        TabInfo hotNewsTab = new TabInfo(hotNewsPanel).setText("热榜");
+        tabs.addTab(hotNewsTab);
+
+        // 创建 Fish 面板
+        fishPanel.loadUrl("https://fish.codebug.icu/");
+        TabInfo fishTab = new TabInfo(fishPanel).setText("Fish");
+        tabs.addTab(fishTab);
+
+        // 添加标签页到主面板
+        this.add(tabs.getComponent(), BorderLayout.CENTER);
+
+        // 启动定时刷新
+        startAutoRefresh();
+        
+        // 加载初始数据
+        refreshData();
+    }
+
+    private JBPanel createHotNewsPanel() {
+        JBPanel panel = new JBPanel<>(new BorderLayout());
+
+        // 配置主分割面板
         mainSplitPane.setDividerLocation(150);
         mainSplitPane.setDividerSize(3);
 
-        // 创建内容分割面板（新闻列表和预览）
-        contentSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        // 配置内容分割面板
         contentSplitPane.setDividerLocation(400);
         contentSplitPane.setDividerSize(3);
 
-        // 创建平台列表
-        platformListModel = new DefaultListModel<>();
-        platformList = new JList<>(platformListModel);
+        // 配置平台列表
         platformList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        platformList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, value,
+                        index, isSelected, cellHasFocus);
+                label.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+                label.setOpaque(true);
+                if (isSelected) {
+                    label.setBackground(list.getSelectionBackground());
+                    label.setForeground(list.getSelectionForeground());
+                } else {
+                    label.setBackground(list.getBackground());
+                    label.setForeground(list.getForeground());
+                }
+                return label;
+            }
+        });
         platformList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 String selectedPlatform = platformList.getSelectedValue();
@@ -68,21 +127,8 @@ public class HotNewsListPanel extends JBPanel<HotNewsListPanel> implements Dispo
             }
         });
 
-        // 创建新闻列表表格
-        String[] columnNames = {"序号", "标题", "关注数"};
-        newsTableModel = new DefaultTableModel(columnNames, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        newsTable = new JBTable(newsTableModel);
+        // 配置新闻表格
         newsTable.setFillsViewportHeight(true);
-        
-        // 创建预览面板（包含加载动画）
-        previewPanel = new HotNewsPreviewPanel(project);
-        loadingDecorator = new LoadingDecorator(previewPanel, this, 0);
         
         // 添加表格选择监听器
         newsTable.getSelectionModel().addListSelectionListener(e -> {
@@ -90,15 +136,13 @@ public class HotNewsListPanel extends JBPanel<HotNewsListPanel> implements Dispo
                 int row = newsTable.getSelectedRow();
                 if (row >= 0 && row < currentNewsList.size()) {
                     HotNews news = currentNewsList.get(row);
-                    if (!news.getUrl().isEmpty()) {  // 只在有URL时显示加载动画
-                        // 停止之前的加载动画（如果存在）
+                    if (!news.getUrl().isEmpty()) {
                         if (loadingTimer != null && loadingTimer.isRunning()) {
                             loadingTimer.stop();
                             loadingTimer = null;
                         }
                         loadingDecorator.startLoading(false);
                         previewPanel.loadUrl(news.getUrl());
-                        // 延迟3秒后隐藏加载动画
                         loadingTimer = new javax.swing.Timer(3000, evt -> {
                             loadingDecorator.stopLoading();
                             ((javax.swing.Timer) evt.getSource()).stop();
@@ -113,9 +157,9 @@ public class HotNewsListPanel extends JBPanel<HotNewsListPanel> implements Dispo
         
         // 设置列宽
         TableColumnModel columnModel = newsTable.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(50);  // 序号列
-        columnModel.getColumn(1).setPreferredWidth(300); // 标题列
-        columnModel.getColumn(2).setPreferredWidth(100); // 关注数列
+        columnModel.getColumn(0).setPreferredWidth(50);
+        columnModel.getColumn(1).setPreferredWidth(300);
+        columnModel.getColumn(2).setPreferredWidth(100);
         
         // 设置序号列居中对齐
         columnModel.getColumn(0).setCellRenderer((table, value, isSelected, hasFocus, row, column) -> {
@@ -152,14 +196,8 @@ public class HotNewsListPanel extends JBPanel<HotNewsListPanel> implements Dispo
         mainSplitPane.setLeftComponent(leftPanel);
         mainSplitPane.setRightComponent(contentSplitPane);
 
-        // 添加主分割面板到主面板
-        this.add(mainSplitPane, BorderLayout.CENTER);
-
-        // 启动定时刷新
-        startAutoRefresh();
-        
-        // 加载初始数据
-        refreshData();
+        panel.add(mainSplitPane, BorderLayout.CENTER);
+        return panel;
     }
 
     private void startAutoRefresh() {
@@ -179,6 +217,9 @@ public class HotNewsListPanel extends JBPanel<HotNewsListPanel> implements Dispo
         }
         if (previewPanel instanceof Disposable) {
             ((Disposable) previewPanel).dispose();
+        }
+        if (fishPanel instanceof Disposable) {
+            ((Disposable) fishPanel).dispose();
         }
     }
 
