@@ -14,11 +14,10 @@ import com.cong.fishisland.model.ws.response.WSBaseResp;
 import com.cong.fishisland.service.RoomMessageService;
 import com.cong.fishisland.websocket.event.AIAnswerEvent;
 import com.cong.fishisland.websocket.service.WebSocketService;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 机器人回答消息监听器
@@ -39,7 +36,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AIQuestionAnswerListener {
     private final WebSocketService webSocketService;
-    private final AIChatDataSource aiChatDataSource;
+    @Qualifier("siliconFlowDataSource")
+    private final AIChatDataSource siliconFlowDataSource;
+    @Qualifier("chutesAI2DataSource")
+    private final AIChatDataSource chutesAI2DataSource;
     private final RoomMessageService roomMessageService;
     // 系统预设
     private final String SYSTEM_PROMPT = "你是摸鱼小助手，你的任务是负责解决摸鱼用户的各种问题，" +
@@ -53,6 +53,13 @@ public class AIQuestionAnswerListener {
         Message message = messageDto.getMessage();
         String senderId = message.getSender().getId();
         String content = message.getContent().trim().replace("@摸鱼助手", "");
+        if (content.contains("我是真爱粉:")) {
+            String imgContent = content.replace("我是真爱粉:", "");
+            AiResponse aiResponse = chutesAI2DataSource.getAiResponse(imgContent, "flux.1-dev");
+            //AI 回答
+            sendAndSaveAiMessage("[img]" + aiResponse.getAnswer() + "[/img]", message);
+            return;
+        }
 
         // 获取或初始化消息列表
         List<SiliconFlowRequest.Message> messages = new ArrayList<>();
@@ -71,7 +78,7 @@ public class AIQuestionAnswerListener {
         }});
 
         // 调用 AI
-        AiResponse aiResponse = aiChatDataSource.getAiResponse(requestMessages, "internlm/internlm2_5-20b-chat");
+        AiResponse aiResponse = siliconFlowDataSource.getAiResponse(requestMessages, "internlm/internlm2_5-20b-chat");
 
         // 添加 AI 响应消息
         SiliconFlowRequest.Message assistantMessage = new SiliconFlowRequest.Message() {{

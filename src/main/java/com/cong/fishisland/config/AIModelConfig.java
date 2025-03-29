@@ -17,6 +17,10 @@ public class AIModelConfig {
      * 硅基流动模型KEY
      */
     private String siliconFlow;
+    /**
+     * 鱼类识别模型KEY
+     */
+    private String chutesAi2;
 
 
 }
