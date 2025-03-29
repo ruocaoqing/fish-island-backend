@@ -69,6 +69,16 @@ public class User implements Serializable {
     private String userRole;
 
     /**
+     * 用户穿戴的头像框
+     */
+    private String avatarFramerUrl;
+
+    /**
+     * 用户拥有的头像框列表 JSON
+     */
+    private String avatarFramerList;
+
+    /**
      * 创建时间
      */
     private Date createTime;

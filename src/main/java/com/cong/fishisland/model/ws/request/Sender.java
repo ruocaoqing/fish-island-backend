@@ -29,6 +29,9 @@ public class Sender {
     @JsonProperty("level")
     private int level;
 
+    @JsonProperty("avatarFramerUrl")
+    private String avatarFramerUrl;
+
     @JsonProperty("isAdmin")
     private boolean isAdmin;
 

@@ -26,20 +26,36 @@ create table if not exists user
     index idx_unionId (unionId)
 ) comment '用户' collate = utf8mb4_unicode_ci;
 ALTER TABLE user
-    ADD COLUMN email VARCHAR(256) NULL COMMENT '邮箱' after  mpOpenId,
+    ADD COLUMN email VARCHAR(256) NULL COMMENT '邮箱' after mpOpenId,
     ADD UNIQUE INDEX idx_email (email);
+
+ALTER TABLE user
+    ADD COLUMN avatarFramerUrl  VARCHAR(256) NULL COMMENT '用户头像框地址' after userAvatar,
+    ADD COLUMN avatarFramerList VARCHAR(256) NULL COMMENT '用户头像框 ID Json 列表' after avatarFramerUrl;
+
+-- 头像框表
+create table if not exists avatar_frame
+(
+    frameId        BIGINT auto_increment comment '头像框 ID' PRIMARY KEY,
+    url            VARCHAR(256) comment '头像框名称',
+    name           VARCHAR(256) comment '头像框名称',
+    points         INT      DEFAULT 1 comment '头像框所需兑换积分',
+    createTime     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete       tinyint  default 0                 not null comment '是否删除'
+) comment '头像框' collate = utf8mb4_unicode_ci;
 
 -- 用户积分表
 create table if not exists user_points
 (
-    userId        BIGINT comment '用户 ID' PRIMARY KEY,
-    points         INT          DEFAULT 100 comment '积分',     -- 初始100积分
-    usedPoints     INT          DEFAULT 0 comment '已使用积分', -- 初始100积分
-    level          INT          DEFAULT 1 comment '用户等级',   -- 用户等级（积分除以一百等于等级）
-    lastSignInDate datetime comment '最后签到时间',             -- 最后签到时间
-    createTime     datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
-    updateTime     datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    isDelete       tinyint      default 0                 not null comment '是否删除'
+    userId         BIGINT comment '用户 ID' PRIMARY KEY,
+    points         INT      DEFAULT 100 comment '积分',     -- 初始100积分
+    usedPoints     INT      DEFAULT 0 comment '已使用积分', -- 初始100积分
+    level          INT      DEFAULT 1 comment '用户等级',   -- 用户等级（积分除以一百等于等级）
+    lastSignInDate datetime comment '最后签到时间',         -- 最后签到时间
+    createTime     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete       tinyint  default 0                 not null comment '是否删除'
 ) comment '用户积分' collate = utf8mb4_unicode_ci;
 
 -- 帖子表

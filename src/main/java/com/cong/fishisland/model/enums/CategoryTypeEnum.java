@@ -20,7 +20,8 @@ public enum CategoryTypeEnum {
     TECH_PROGRAMMING("技术 & 编程", 2),
     VIDEO_ENTERTAINMENT("视频 & 娱乐", 3),
     MUSIC_HOT("音乐热榜", 4),
-    GOODS_SHARE("好物分享", 5);
+    GOODS_SHARE("好物分享", 5),
+    SPORTS("体育赛事", 6);
 
 
     private final String text;

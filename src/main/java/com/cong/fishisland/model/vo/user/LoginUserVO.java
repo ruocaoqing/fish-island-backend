@@ -56,14 +56,17 @@ public class LoginUserVO implements Serializable {
     /**
      * 积分
      */
-    @TableField(value = "points")
     private Integer points;
 
     /**
      * 已使用积分
      */
-    @TableField(value = "usedPoints")
     private Integer usedPoints;
+
+    /**
+     * 用户当前头像框地址
+     */
+    private String avatarFramerUrl;
 
     /**
      * 用户等级

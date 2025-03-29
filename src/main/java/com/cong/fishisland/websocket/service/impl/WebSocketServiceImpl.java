@@ -9,7 +9,6 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.config.ThreadPoolConfig;
 import com.cong.fishisland.constant.UserConstant;
@@ -370,6 +369,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         userChatResponse.setId(String.valueOf(currentUser.getId()));
         userChatResponse.setName(currentUser.getUserName());
         userChatResponse.setAvatar(currentUser.getUserAvatar());
+        userChatResponse.setAvatarFramerUrl(currentUser.getAvatarFramerUrl());
         //目前为一级
         userChatResponse.setLevel(loginUserVO.getLevel());
         userChatResponse.setIsAdmin(currentUser.getUserRole().equals(UserConstant.ADMIN_ROLE) ?

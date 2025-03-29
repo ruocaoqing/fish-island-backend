@@ -12,6 +12,8 @@
         <result property="mpOpenId" column="mpOpenId" />
         <result property="email" column="email" />
         <result property="userName" column="userName" />
+        <result property="avatarFramerList" column="avatarFramerList" />
+        <result property="avatarFramerUrl" column="avatarFramerUrl" />
         <result property="userAvatar" column="userAvatar" />
         <result property="userProfile" column="userProfile" />
         <result property="userRole" column="userRole" />
@@ -21,7 +23,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,userAccount,userPassword,unionId,mpOpenId,email,
+        id,userAccount,userPassword,unionId,mpOpenId,email,avatarFramerList,avatarFramerUrl,
         userName,userAvatar,userProfile,userRole,createTime,
         updateTime,isDelete
     </sql>

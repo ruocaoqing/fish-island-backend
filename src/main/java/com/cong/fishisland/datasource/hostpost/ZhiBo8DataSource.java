@@ -49,10 +49,10 @@ public class ZhiBo8DataSource implements DataSource {
         }
 
         return HotPost.builder()
-                .sort(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
+                .sort(CategoryTypeEnum.SPORTS.getValue())
                 .name("直播吧体育热榜")
-                .category(CategoryTypeEnum.GENERAL_DISCUSSION.getValue())
-                .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
+                .category(CategoryTypeEnum.SPORTS.getValue())
+                .updateInterval(UpdateIntervalEnum.ONE_HOUR.getValue())
                 .iconUrl("https://zhibo8.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
                 .typeName("直播吧")
