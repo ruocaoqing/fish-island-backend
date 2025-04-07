@@ -61,6 +61,14 @@ public class ChutesAI2DataSource implements AIChatDataSource {
         String result = response.body();
         JSONObject jsonObject = JSON.parseObject(result);
         JSONArray jsonArray = jsonObject.getJSONArray("data");
+        if (jsonArray.isEmpty() || jsonArray.getJSONObject(0).getString("b64_json") == null) {
+            return AiResponse
+                    .builder()
+                    .id("-1")
+                    .aiName(model)
+                    .answer("生成图片失败了，请稍后再试")
+                    .build();
+        }
         String b64Json = jsonArray.getJSONObject(0).getString("b64_json");
 
         // 将 base64 转换为图片文件
