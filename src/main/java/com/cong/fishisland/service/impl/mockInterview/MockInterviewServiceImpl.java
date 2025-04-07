@@ -48,6 +48,16 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
     @Resource
     private UserService userService;
 
+    private final String systemPromptFormat = "你是一位严厉的程序员面试官，我是候选人，来应聘 %s 的 %s 岗位，面试难度为 %s。请你向我依次提出问题（最多 20 个问题），我也会依次回复。在这期间请完全保持真人面试官的口吻，比如适当引导学员、或者表达出你对学员回答的态度。\n" +
+            "必须满足如下要求：\n" +
+            "1. 当学员回复 “开始” 时，你要正式开始面试\n" +
+            "2. 当学员表示希望 “结束面试” 时，你要结束面试\n" +
+            "3. 此外，当你觉得这场面试可以结束时（比如候选人回答结果较差、不满足工作年限的招聘需求、或者候选人态度不礼貌），必须主动提出面试结束，不用继续询问更多问题了。并且要在回复中包含字符串【面试结束】\n" +
+            "4. 面试结束后，应该给出候选人整场面试的表现和总结。";
+
+    final ChatMessage userStartMessage = ChatMessage.builder().role(ChatMessageRoleEnum.USER).content("开始").build();
+    final ChatMessage endUserMessage = ChatMessage.builder()
+            .role(ChatMessageRoleEnum.USER).content("结束").build();
     /**
      * 创建模拟面试
      */
@@ -152,16 +162,16 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
         // 构造消息列表，注意需要先获取之前的消息记录
         String historyMessage = mockInterview.getMessages();
         List<MockInterviewChatMessage> historyMessageList = JSONUtil.parseArray(historyMessage).toList(MockInterviewChatMessage.class);
-        final List<ChatMessage> chatMessages = transformToChatMessage(historyMessageList);
+        List<ChatMessage> chatMessages = transformToChatMessage(historyMessageList);
+
         // 构造用户结束消息
-        String endUserPrompt = "结束";
-        final ChatMessage endUserMessage = ChatMessage.builder()
-                .role(ChatMessageRoleEnum.USER).content(endUserPrompt).build();
         chatMessages.add(endUserMessage);
+
         // 调用 AI 获取结果
         String endAnswer = aiManager.doChat(chatMessages);
         ChatMessage endAssistantMessage = ChatMessage.builder().role(ChatMessageRoleEnum.ASSISTANT).content(endAnswer).build();
         chatMessages.add(endAssistantMessage);
+
         // 保存消息记录，并且更新状态
         List<MockInterviewChatMessage> mockInterviewChatMessages = transformFromChatMessage(chatMessages);
         String newJsonStr = JSONUtil.toJsonStr(mockInterviewChatMessages);
@@ -170,7 +180,9 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
         newUpdateMockInterview.setId(mockInterview.getId());
         newUpdateMockInterview.setMessages(newJsonStr);
         boolean newResult = this.updateById(newUpdateMockInterview);
+
         ThrowUtils.throwIf(!newResult, ErrorCode.SYSTEM_ERROR, "更新失败");
+
         return endAnswer;
     }
 
@@ -182,25 +194,32 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
         // 构造消息列表，注意需要先获取之前的消息记录
         String historyMessage = mockInterview.getMessages();
         List<MockInterviewChatMessage> historyMessageList = JSONUtil.parseArray(historyMessage).toList(MockInterviewChatMessage.class);
-        final List<ChatMessage> chatMessages = transformToChatMessage(historyMessageList);
-        final ChatMessage chatUserMessage = ChatMessage.builder().role(ChatMessageRoleEnum.USER).content(message).build();
+
+        List<ChatMessage> chatMessages = transformToChatMessage(historyMessageList);
+        ChatMessage chatUserMessage = ChatMessage.builder().role(ChatMessageRoleEnum.USER).content(message).build();
         chatMessages.add(chatUserMessage);
+
         // 调用 AI 获取结果
         String chatAnswer = aiManager.doChat(chatMessages);
         ChatMessage chatAssistantMessage = ChatMessage.builder().role(ChatMessageRoleEnum.ASSISTANT).content(chatAnswer).build();
         chatMessages.add(chatAssistantMessage);
+
         // 保存消息记录，并且更新状态
         List<MockInterviewChatMessage> mockInterviewChatMessages = transformFromChatMessage(chatMessages);
         String newJsonStr = JSONUtil.toJsonStr(mockInterviewChatMessages);
         MockInterview newUpdateMockInterview = new MockInterview();
         newUpdateMockInterview.setId(mockInterview.getId());
         newUpdateMockInterview.setMessages(newJsonStr);
+
         // 如果 AI 主动结束了面试，更改状态
         if (chatAnswer.contains("【面试结束】")) {
             newUpdateMockInterview.setStatus(MockInterviewStatusEnum.ENDED.getValue());
         }
+
         boolean newResult = this.updateById(newUpdateMockInterview);
+
         ThrowUtils.throwIf(!newResult, ErrorCode.SYSTEM_ERROR, "更新失败");
+
         return chatAnswer;
     }
 
@@ -210,31 +229,35 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
     private String handleChatStartEvent(MockInterview mockInterview) {
         // 构造消息列表
         // 定义 AI 的 Prompt
-        String systemPrompt = String.format("你是一位严厉的程序员面试官，我是候选人，来应聘 %s 的 %s 岗位，面试难度为 %s。请你向我依次提出问题（最多 20 个问题），我也会依次回复。在这期间请完全保持真人面试官的口吻，比如适当引导学员、或者表达出你对学员回答的态度。\n" +
-                "必须满足如下要求：\n" +
-                "1. 当学员回复 “开始” 时，你要正式开始面试\n" +
-                "2. 当学员表示希望 “结束面试” 时，你要结束面试\n" +
-                "3. 此外，当你觉得这场面试可以结束时（比如候选人回答结果较差、不满足工作年限的招聘需求、或者候选人态度不礼貌），必须主动提出面试结束，不用继续询问更多问题了。并且要在回复中包含字符串【面试结束】\n" +
-                "4. 面试结束后，应该给出候选人整场面试的表现和总结。", mockInterview.getWorkExperience(), mockInterview.getJobPosition(), mockInterview.getDifficulty());
-        String userPrompt = "开始";
-        final List<ChatMessage> messages = new ArrayList<>();
-        final ChatMessage systemMessage = ChatMessage.builder().role(ChatMessageRoleEnum.SYSTEM).content(systemPrompt).build();
-        final ChatMessage userMessage = ChatMessage.builder().role(ChatMessageRoleEnum.USER).content(userPrompt).build();
+        String systemPrompt = String.format(systemPromptFormat, mockInterview.getWorkExperience(), mockInterview.getJobPosition(), mockInterview.getDifficulty());
+
+        List<ChatMessage> messages = new ArrayList<>();
+
+        ChatMessage systemMessage = ChatMessage.builder()
+                .role(ChatMessageRoleEnum.SYSTEM).content(systemPrompt).build();
+
         messages.add(systemMessage);
-        messages.add(userMessage);
+        messages.add(userStartMessage);
+
         // 调用 AI 获取结果
         String answer = aiManager.doChat(messages);
-        ChatMessage assistantMessage = ChatMessage.builder().role(ChatMessageRoleEnum.ASSISTANT).content(answer).build();
+        ChatMessage assistantMessage = ChatMessage.builder()
+                .role(ChatMessageRoleEnum.ASSISTANT)
+                .content(answer).build();
         messages.add(assistantMessage);
+
         // 保存消息记录，并且更新状态
         List<MockInterviewChatMessage> chatMessageList = transformFromChatMessage(messages);
         String jsonStr = JSONUtil.toJsonStr(chatMessageList);
+
         // 操作数据库进行更新
         MockInterview updateMockInterview = new MockInterview();
         updateMockInterview.setStatus(MockInterviewStatusEnum.IN_PROGRESS.getValue());
         updateMockInterview.setId(mockInterview.getId());
         updateMockInterview.setMessages(jsonStr);
+
         boolean result = this.updateById(updateMockInterview);
+
         ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "更新失败");
         return answer;
     }
@@ -255,11 +278,9 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
      * 消息记录对象转换
      */
     List<ChatMessage> transformToChatMessage(List<MockInterviewChatMessage> chatMessageList) {
-        return chatMessageList.stream().map(chatMessage -> {
-            ChatMessage tempChatMessage = ChatMessage.builder().role(ChatMessageRoleEnum.valueOf(StringUtils.upperCase(chatMessage.getRole())))
-                    .content(chatMessage.getMessage()).build();
-            return tempChatMessage;
-        }).collect(Collectors.toList());
+        return chatMessageList.stream().map(chatMessage -> ChatMessage.builder()
+                .role(ChatMessageRoleEnum.valueOf(StringUtils.upperCase(chatMessage.getRole())))
+                .content(chatMessage.getMessage()).build()).collect(Collectors.toList());
     }
 
 }
