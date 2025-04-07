@@ -38,7 +38,7 @@ public class AiManager {
     public AiManager(RestTemplateBuilder restTemplateBuilder, AIModelConfig aiConfig) {
         this.aiConfig = aiConfig;
         this.restTemplate = restTemplateBuilder
-                .defaultHeader("Authorization", aiConfig.getAuthorization())
+                .defaultHeader("Authorization", "ccong")
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
@@ -90,7 +90,7 @@ public class AiManager {
         try {
             // 发送请求
             ResponseEntity<Map> response = restTemplate.postForEntity(
-                    aiConfig.getUrl(),
+                    aiConfig.getChutesAi2()+"/chat/completions",
                     requestBody,
                     Map.class
             );

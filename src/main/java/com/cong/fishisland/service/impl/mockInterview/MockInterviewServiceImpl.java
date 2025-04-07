@@ -155,7 +155,8 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
         final List<ChatMessage> chatMessages = transformToChatMessage(historyMessageList);
         // 构造用户结束消息
         String endUserPrompt = "结束";
-        final ChatMessage endUserMessage = ChatMessage.builder().role(ChatMessageRoleEnum.USER).content(endUserPrompt).build();
+        final ChatMessage endUserMessage = ChatMessage.builder()
+                .role(ChatMessageRoleEnum.USER).content(endUserPrompt).build();
         chatMessages.add(endUserMessage);
         // 调用 AI 获取结果
         String endAnswer = aiManager.doChat(chatMessages);

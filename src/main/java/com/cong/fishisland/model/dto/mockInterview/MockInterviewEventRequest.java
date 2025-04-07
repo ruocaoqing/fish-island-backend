@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 /**
  * 模拟面试事件请求
+ * @author cong
  */
 @Data
 public class MockInterviewEventRequest  implements Serializable {

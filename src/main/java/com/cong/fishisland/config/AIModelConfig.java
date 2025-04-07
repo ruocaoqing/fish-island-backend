@@ -22,8 +22,4 @@ public class AIModelConfig {
      */
     private String chutesAi2;
 
-    private  String Url;
-
-    private  String Authorization;
-
 }

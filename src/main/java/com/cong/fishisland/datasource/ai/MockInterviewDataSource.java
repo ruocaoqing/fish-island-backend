@@ -46,8 +46,8 @@ public class MockInterviewDataSource implements AIChatDataSource {
 
         try {
             // 发送请求
-            HttpResponse response = HttpRequest.post(aiModelConfig.getUrl())
-                    .header("Authorization", aiModelConfig.getAuthorization())
+            HttpResponse response = HttpRequest.post(aiModelConfig.getChutesAi2()+"/chat/completions")
+                    .header("Authorization", "ccong")
                     .header("Content-Type", "application/json")
                     .body(JSONUtil.toJsonStr(request))
                     .execute();
