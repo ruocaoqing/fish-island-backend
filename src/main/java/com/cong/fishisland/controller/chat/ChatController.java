@@ -3,6 +3,7 @@ package com.cong.fishisland.controller.chat;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ResultUtils;
+import com.cong.fishisland.service.impl.FlexChatServiceDemo;
 import com.cong.fishisland.model.dto.chat.MessageQueryRequest;
 import com.cong.fishisland.model.vo.chat.RoomMessageVo;
 import com.cong.fishisland.model.ws.response.UserChatResponse;
@@ -12,7 +13,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -31,6 +35,14 @@ public class ChatController {
 
     private final RoomMessageService roomMessageService;
     private final WebSocketService webSocketService;
+
+    @Autowired
+    private FlexChatServiceDemo flexChatServiceDemo;
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> streamChatDemo(@RequestParam String prompt) {
+        return flexChatServiceDemo.streamChat(prompt);
+    }
 
     @PostMapping("/message/page/vo")
     @ApiOperation(value = "分页获取用户房间消息列表")
