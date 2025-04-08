@@ -1,4 +1,4 @@
-package com.cong.fishisland.service.impl.mockInterview;
+package com.cong.fishisland.service.impl.mockinterview;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -14,10 +14,8 @@ import com.cong.fishisland.model.dto.mockInterview.MockInterviewAddRequest;
 import com.cong.fishisland.model.dto.mockInterview.MockInterviewChatMessage;
 import com.cong.fishisland.model.dto.mockInterview.MockInterviewEventRequest;
 import com.cong.fishisland.model.dto.mockInterview.MockInterviewQueryRequest;
-import com.cong.fishisland.model.entity.chat.ChatMessage;
 import com.cong.fishisland.model.entity.mockInterview.MockInterview;
 import com.cong.fishisland.model.entity.user.User;
-import com.cong.fishisland.model.enums.ChatMessageRoleEnum;
 import com.cong.fishisland.model.enums.MockInterviewEventEnum;
 import com.cong.fishisland.model.enums.MockInterviewStatusEnum;
 import com.cong.fishisland.model.vo.ai.AiResponse;
@@ -34,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import static com.cong.fishisland.datasource.ai.MockInterviewDataSource.DEFAULT_MODEL;
 
 /**
  * @author Shing
@@ -47,8 +46,6 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
     @Resource
     private MockInterviewDataSource mockInterviewDataSource;
 
-    private static final String DEFAULT_MODEL = "deepseek-v3-0324";
-
     @Resource
     private UserService userService;
 
@@ -59,9 +56,18 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
             "3. 此外，当你觉得这场面试可以结束时（比如候选人回答结果较差、不满足工作年限的招聘需求、或者候选人态度不礼貌），必须主动提出面试结束，不用继续询问更多问题了。并且要在回复中包含字符串【面试结束】\n" +
             "4. 面试结束后，应该给出候选人整场面试的表现和总结。";
 
-    final ChatMessage userStartMessage = ChatMessage.builder().role(ChatMessageRoleEnum.USER).content("开始").build();
-    final ChatMessage endUserMessage = ChatMessage.builder()
-            .role(ChatMessageRoleEnum.USER).content("结束").build();
+    final SiliconFlowRequest.Message userStartMessage = new SiliconFlowRequest.Message();
+    final SiliconFlowRequest.Message endUserMessage = new SiliconFlowRequest.Message();
+
+    // 初始化块设置消息属性
+    {
+        userStartMessage.setRole("user");
+        userStartMessage.setContent("开始");
+
+        endUserMessage.setRole("user");
+        endUserMessage.setContent("结束");
+    }
+
 
     /**
      * 创建模拟面试
@@ -124,19 +130,6 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
     }
 
     /**
-     * 将 ChatMessage 列表转换为 SiliconFlowRequest.Message 列表
-     */
-    private List<SiliconFlowRequest.Message> convertToSiliconFlowMessages(List<ChatMessage> chatMessages) {
-        return chatMessages.stream().map(chatMessage -> {
-            SiliconFlowRequest.Message msg = new SiliconFlowRequest.Message();
-            // 角色转换为小写字符串，如 "user", "assistant", "system"
-            msg.setRole(chatMessage.getRole().toLowerCase());
-            msg.setContent(chatMessage.getContent());
-            return msg;
-        }).collect(Collectors.toList());
-    }
-
-    /**
      * 处理模拟面试事件
      */
     @Override
@@ -183,33 +176,29 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
                 mockInterview.getJobPosition(),
                 mockInterview.getDifficulty());
 
-        List<ChatMessage> messages = new ArrayList<>();
+        List<SiliconFlowRequest.Message> messages = new ArrayList<>();
 
         // 添加系统消息
-        ChatMessage systemMessage = ChatMessage.builder()
-                .role(ChatMessageRoleEnum.SYSTEM)
-                .content(systemPrompt)
-                .build();
+        SiliconFlowRequest.Message systemMessage = new SiliconFlowRequest.Message();
+        systemMessage.setRole("system");
+        systemMessage.setContent(systemPrompt);
         messages.add(systemMessage);
-        // 添加用户发起对话的消息（例如预设的起始消息）
+
         messages.add(userStartMessage);
 
-        // 将 ChatMessage 列表转换为 SiliconFlowRequest.Message 列表
-        List<SiliconFlowRequest.Message> siliconFlowMessages = convertToSiliconFlowMessages(messages);
 
         // 调用 AI 接口获取回复
-        AiResponse aiResponse = mockInterviewDataSource.getAiResponse(siliconFlowMessages,DEFAULT_MODEL);
+        AiResponse aiResponse = mockInterviewDataSource.getAiResponse(messages,DEFAULT_MODEL);
         String answer = aiResponse.getAnswer();
 
         // 封装 AI 回复消息，添加至消息列表
-        ChatMessage assistantMessage = ChatMessage.builder()
-                .role(ChatMessageRoleEnum.ASSISTANT)
-                .content(answer)
-                .build();
+        SiliconFlowRequest.Message assistantMessage = new SiliconFlowRequest.Message();
+        assistantMessage.setRole("assistant");
+        assistantMessage.setContent(answer);
         messages.add(assistantMessage);
 
         // 保存更新后的消息记录（转换为可持久化保存的格式）
-        List<MockInterviewChatMessage> chatMessageList = transformFromChatMessage(messages);
+        List<MockInterviewChatMessage> chatMessageList = transformFromSiliconFlowMessage(messages);
         String jsonStr = JSONUtil.toJsonStr(chatMessageList);
 
         // 更新面试记录状态为进行中，并保存消息记录
@@ -231,35 +220,30 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
         String message = mockInterviewEventRequest.getMessage();
 
         // 获取历史消息记录
-        String historyMessage = mockInterview.getMessages();
-        List<MockInterviewChatMessage> historyMessageList = JSONUtil.parseArray(historyMessage)
-                .toList(MockInterviewChatMessage.class);
-        List<ChatMessage> chatMessages = transformToChatMessage(historyMessageList);
+        List<SiliconFlowRequest.Message> historyMessages = JSONUtil.parseArray(mockInterview.getMessages())
+                .toList(MockInterviewChatMessage.class)
+                .stream()
+                .map(this::convertToSiliconFlowMessage)
+                .collect(Collectors.toList());
 
-        // 添加本次用户消息
-        ChatMessage chatUserMessage = ChatMessage.builder()
-                .role(ChatMessageRoleEnum.USER)
-                .content(message)
-                .build();
-        chatMessages.add(chatUserMessage);
-
-        // 转换为 SiliconFlowRequest.Message 列表
-        List<SiliconFlowRequest.Message> siliconFlowMessages = convertToSiliconFlowMessages(chatMessages);
+        SiliconFlowRequest.Message userMessage = new SiliconFlowRequest.Message();
+        userMessage.setRole("user");
+        userMessage.setContent(message);
+        historyMessages.add(userMessage);
 
         // 调用 AI 接口获取回复
-        AiResponse aiResponse = mockInterviewDataSource.getAiResponse(siliconFlowMessages, DEFAULT_MODEL);
+        AiResponse aiResponse = mockInterviewDataSource.getAiResponse(historyMessages, DEFAULT_MODEL);
         String chatAnswer = aiResponse.getAnswer();
 
         // 封装 AI 的回复消息
-        ChatMessage chatAssistantMessage = ChatMessage.builder()
-                .role(ChatMessageRoleEnum.ASSISTANT)
-                .content(chatAnswer)
-                .build();
-        chatMessages.add(chatAssistantMessage);
+        SiliconFlowRequest.Message assistantMessage = new SiliconFlowRequest.Message();
+        assistantMessage.setRole("assistant");
+        assistantMessage.setContent(chatAnswer);
+        historyMessages.add(assistantMessage);
 
         // 更新消息记录，转换为可保存的格式并转换为 JSON 字符串
-        List<MockInterviewChatMessage> mockInterviewChatMessages = transformFromChatMessage(chatMessages);
-        String newJsonStr = JSONUtil.toJsonStr(mockInterviewChatMessages);
+        List<MockInterviewChatMessage> chatMessages = transformFromSiliconFlowMessage(historyMessages);
+        String newJsonStr = JSONUtil.toJsonStr(chatMessages);
 
         MockInterview newUpdateMockInterview = new MockInterview();
         newUpdateMockInterview.setId(mockInterview.getId());
@@ -284,28 +268,35 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
         String historyMessage = mockInterview.getMessages();
         List<MockInterviewChatMessage> historyMessageList = JSONUtil.parseArray(historyMessage)
                 .toList(MockInterviewChatMessage.class);
-        // 转换为内部通用消息格式
-        List<ChatMessage> chatMessages = transformToChatMessage(historyMessageList);
 
-        // 添加用户结束消息
-        chatMessages.add(endUserMessage);
+        // 1.直接转换为 SiliconFlowRequest.Message 列表
+        List<SiliconFlowRequest.Message> messages = historyMessageList.stream()
+                .map(this::convertToSiliconFlowMessage)
+                .collect(Collectors.toList());
 
-        // 将 ChatMessage 列表转换为 SiliconFlowRequest.Message 列表
-        List<SiliconFlowRequest.Message> siliconFlowMessages = convertToSiliconFlowMessages(chatMessages);
+        // 2.添加用户结束消息（使用预定义的 endUserMessage）
+        messages.add(endUserMessage);
 
         // 调用 AI 接口获取答案（使用默认模型）
-        AiResponse aiResponse = mockInterviewDataSource.getAiResponse(siliconFlowMessages, DEFAULT_MODEL);
+        AiResponse aiResponse = mockInterviewDataSource.getAiResponse(messages, DEFAULT_MODEL);
         String endAnswer = aiResponse.getAnswer();
 
-        // 将 AI 回答包装成对话消息，并添加到消息列表中
-        ChatMessage endAssistantMessage = ChatMessage.builder()
-                .role(ChatMessageRoleEnum.ASSISTANT)
-                .content(endAnswer)
-                .build();
-        chatMessages.add(endAssistantMessage);
+        // 3.构建 AI 回复消息
+        SiliconFlowRequest.Message assistantMessage = new SiliconFlowRequest.Message();
+        assistantMessage.setRole("assistant");
+        assistantMessage.setContent(endAnswer);
+        messages.add(assistantMessage);
 
-        // 转换成持久化保存的消息格式，并保存为 JSON 字符串
-        List<MockInterviewChatMessage> mockInterviewChatMessages = transformFromChatMessage(chatMessages);
+        // 转换持久化格式
+        List<MockInterviewChatMessage> mockInterviewChatMessages = messages.stream()
+                .map(msg -> {
+                    MockInterviewChatMessage entity = new MockInterviewChatMessage();
+                    entity.setRole(msg.getRole());
+                    entity.setMessage(msg.getContent());
+                    return entity;
+                })
+                .collect(Collectors.toList());
+
         String newJsonStr = JSONUtil.toJsonStr(mockInterviewChatMessages);
 
         // 更新面试记录状态为已结束，同时保存消息记录
@@ -321,24 +312,25 @@ public class MockInterviewServiceImpl extends ServiceImpl<MockInterviewMapper, M
     }
 
     /**
-     * 消息记录对象转换
+     * 转换持久化消息格式
      */
-    List<MockInterviewChatMessage> transformFromChatMessage(List<ChatMessage> chatMessageList) {
-        return chatMessageList.stream().map(chatMessage -> {
-            MockInterviewChatMessage mockInterviewChatMessage = new MockInterviewChatMessage();
-            mockInterviewChatMessage.setRole(chatMessage.getRole());
-            mockInterviewChatMessage.setMessage(chatMessage.getContent());
-            return mockInterviewChatMessage;
+    private List<MockInterviewChatMessage> transformFromSiliconFlowMessage(List<SiliconFlowRequest.Message> messages) {
+        return messages.stream().map(msg -> {
+            MockInterviewChatMessage entity = new MockInterviewChatMessage();
+            entity.setRole(msg.getRole());
+            entity.setMessage(msg.getContent());
+            return entity;
         }).collect(Collectors.toList());
     }
 
     /**
-     * 消息记录对象转换
+     * 转换历史消息格式
      */
-    List<ChatMessage> transformToChatMessage(List<MockInterviewChatMessage> chatMessageList) {
-        return chatMessageList.stream().map(chatMessage -> ChatMessage.builder()
-                .role(ChatMessageRoleEnum.valueOf(StringUtils.upperCase(chatMessage.getRole())))
-                .content(chatMessage.getMessage()).build()).collect(Collectors.toList());
+    private SiliconFlowRequest.Message convertToSiliconFlowMessage(MockInterviewChatMessage entity) {
+        SiliconFlowRequest.Message msg = new SiliconFlowRequest.Message();
+        msg.setRole(entity.getRole());
+        msg.setContent(entity.getMessage());
+        return msg;
     }
 
 }

@@ -2,8 +2,7 @@ package com.cong.fishisland.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.cong.fishisland.config.AIModelConfig;
-import com.cong.fishisland.model.entity.chat.ChatMessage;
-import com.cong.fishisland.model.enums.ChatMessageRoleEnum;
+import com.cong.fishisland.model.vo.ai.SiliconFlowRequest;
 import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +13,9 @@ import reactor.core.publisher.Flux;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import static com.cong.fishisland.datasource.ai.MockInterviewDataSource.DEFAULT_MODEL;
 
 @Service
 public class FlexChatServiceDemo {
@@ -58,29 +56,27 @@ public class FlexChatServiceDemo {
                 .filter(s -> !s.isEmpty());
     }
 
-    private Map<String, Object> buildRequestBody(String prompt) {
-        List<ChatMessage> messages = new ArrayList<>(2);
-        messages.add(ChatMessage.builder()
-                .role(ChatMessageRoleEnum.USER)
-                .content(prompt)
-                .build());
-        // 构建请求体
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "deepseek-v3-0324");
-        requestBody.put("messages", messages.stream()
-                .map(this::convertMessage)
-                .collect(Collectors.toList()));
-        requestBody.put("stream", true);
-        return requestBody;
-    }
+    // 构建请求体
+    private SiliconFlowRequest buildRequestBody(String prompt) {
+        SiliconFlowRequest request = new SiliconFlowRequest();
+        request.setModel(DEFAULT_MODEL);
+        request.setStream(true);
 
-    /**
-     * 转换消息对象
-     */
-    private Map<String, String> convertMessage(ChatMessage message) {
-        Map<String, String> map = new HashMap<>();
-        map.put("role", message.getRole().toLowerCase());
-        map.put("content", message.getContent());
-        return map;
+        // 构建消息列表
+        List<SiliconFlowRequest.Message> messages = new ArrayList<>();
+        SiliconFlowRequest.Message userMessage = new SiliconFlowRequest.Message();
+        userMessage.setRole("user");
+        userMessage.setContent(prompt);
+        messages.add(userMessage);
+
+        request.setMessages(messages);
+
+        // 设置其他流式参数（根据 SiliconFlowRequest 默认值）
+        request.setMax_tokens(512);
+        request.setTemperature(0.7);
+        request.setTop_p(0.7);
+        // 其他参数保持默认值...
+
+        return request; // 直接返回对象，Jackson 会自动序列化
     }
 }

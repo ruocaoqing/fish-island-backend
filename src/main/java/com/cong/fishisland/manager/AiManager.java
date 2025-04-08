@@ -5,8 +5,8 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.config.AIModelConfig;
-import com.cong.fishisland.model.entity.chat.ChatMessage;
 import com.cong.fishisland.model.enums.ChatMessageRoleEnum;
+import com.cong.fishisland.model.vo.ai.SiliconFlowRequest;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -22,10 +22,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 通用的 AI 调用类
@@ -63,43 +61,43 @@ public class AiManager {
 
     // 完整参数版(系统提示 + 用户输入+ 模型)
     public String doChat(String systemPrompt, String userPrompt, String model) {
-        List<ChatMessage> messages = new ArrayList<>(2);
+        List<SiliconFlowRequest.Message> messages = new ArrayList<>(2);
         if (CharSequenceUtil.isNotBlank(systemPrompt)) {
-            messages.add(ChatMessage.builder()
-                    .role(ChatMessageRoleEnum.SYSTEM)
-                    .content(systemPrompt)
-                    .build());
+            SiliconFlowRequest.Message systemMessage = new SiliconFlowRequest.Message();
+            systemMessage.setRole(ChatMessageRoleEnum.SYSTEM.getValue());
+            systemMessage.setContent(systemPrompt);
+            messages.add(systemMessage);
         }
-        messages.add(ChatMessage.builder()
-                .role(ChatMessageRoleEnum.USER)
-                .content(userPrompt)
-                .build());
+
+        SiliconFlowRequest.Message userMessage = new SiliconFlowRequest.Message();
+        userMessage.setRole(ChatMessageRoleEnum.USER.getValue());
+        userMessage.setContent(userPrompt);
+        messages.add(userMessage);
+
         return doChat(messages, model);
     }
 
     // 消息列表 + 默认模型
-    public String doChat(List<ChatMessage> messages) {
+    public String doChat(List<SiliconFlowRequest.Message> messages) {
         return doChat(messages, DEFAULT_MODEL);
     }
 
     /**
      * 核心请求方法（支持自定义消息列表）
      */
-    public String doChat(List<ChatMessage> messages, String model) {
+    public String doChat(List<SiliconFlowRequest.Message> messages, String model) {
         // 构建请求体
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", model);
-        requestBody.put("messages", messages.stream()
-                .map(this::convertMessage)
-                .collect(Collectors.toList()));
-        requestBody.put("stream", false);
+        SiliconFlowRequest request = new SiliconFlowRequest();
+        request.setModel(model);
+        request.setMessages(messages);
+        request.setStream(false);
 
         try {
             // 发送请求（使用泛型明确的 ParameterizedTypeReference）
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     aiModelConfig.getChutesAi2() + "/chat/completions",
                     HttpMethod.POST,
-                    new HttpEntity<>(requestBody),
+                    new HttpEntity<>(request),
                     new ParameterizedTypeReference<Map<String, Object>>() {
                     }
             );
@@ -159,15 +157,5 @@ public class AiManager {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI 响应中 content 字段不存在或格式错误");
         }
         return (String) contentObj;
-    }
-
-    /**
-     * 转换消息对象
-     */
-    private Map<String, String> convertMessage(ChatMessage message) {
-        Map<String, String> map = new HashMap<>();
-        map.put("role", message.getRole().toLowerCase());
-        map.put("content", message.getContent());
-        return map;
     }
 }

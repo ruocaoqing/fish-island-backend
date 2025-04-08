@@ -27,7 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MockInterviewDataSource implements AIChatDataSource {
 
-    private static final String DEFAULT_MODEL = "deepseek-v3-0324";
+    public static final String DEFAULT_MODEL = "deepseek-v3-0324";
 
     private final AIModelConfig aiModelConfig;
 
