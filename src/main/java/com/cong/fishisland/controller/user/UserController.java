@@ -211,13 +211,13 @@ public class UserController {
     /**
      * 用户邮箱验证码
      *
-     * @param userRegisterRequest 用户注册请求
+     * @param userEmailSendRequest 用户注册请求
      * @return {@link BaseResponse}<{@link Long}>
      */
     @PostMapping("/email/send")
     @ApiOperation(value = "用户邮箱验证码")
-    public BaseResponse<Boolean> userEmailSend(@RequestBody UserRegisterRequest userRegisterRequest) {
-        String email = userRegisterRequest.getEmail();
+    public BaseResponse<Boolean> userEmailSend(@RequestBody UserEmailSendRequest userEmailSendRequest) {
+        String email = userEmailSendRequest.getEmail();
         if (email == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
