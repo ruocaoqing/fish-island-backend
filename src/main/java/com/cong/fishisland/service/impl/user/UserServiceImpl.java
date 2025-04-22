@@ -27,14 +27,12 @@ import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
 import com.cong.fishisland.model.vo.user.UserVO;
 import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.service.UserService;
-import com.cong.fishisland.service.UserThirdAuthService;
 import com.cong.fishisland.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthCallback;
 import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateIntervalUnit;
@@ -183,9 +181,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "该邮箱已注册");
             }
             // 校验验证码
+            if (code == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码不能为空");
+            }
             String correctCode = stringRedisTemplate.opsForValue().get(EMAIL_CODE_PREFIX + email);
-            if (correctCode == null || !correctCode.equals(code)) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误或已过期");
+            if (correctCode == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期");
+            }
+            if (!correctCode.equals(code)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
             }
 
             // 验证码比对成功后删除 Redis 中的验证码，防止重复使用
@@ -363,8 +367,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         try {
             // 校验验证码
             String correctCode = stringRedisTemplate.opsForValue().get(EMAIL_CODE_PREFIX + email);
-            if (correctCode == null || !correctCode.equals(code)) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误或已过期");
+            if (code == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码不能为空");
+            }
+            if (correctCode == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期");
+            }
+            if (!correctCode.equals(code)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
             }
 
             // 验证码比对成功后删除 Redis 中的验证码，防止重复使用
@@ -447,8 +457,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             // 校验验证码
             String correctCode = stringRedisTemplate.opsForValue().get(EMAIL_CODE_PREFIX + email);
-            if (correctCode == null || !correctCode.equals(code)) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误或已过期");
+            if (code == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码不能为空");
+            }
+            if (correctCode == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期");
+            }
+            if (!correctCode.equals(code)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
             }
 
             // 验证码比对成功后删除 Redis 中的验证码，防止重复使用
