@@ -96,8 +96,8 @@ public class EmailManager {
             mailMessage.setFrom(from);
             // 发送邮件
             mailSender.send(mimeMessage);
-            // 存入 Redis，1 分钟有效
-            stringRedisTemplate.opsForValue().set(EMAIL_CODE_PREFIX + sendEmail, code, 1, TimeUnit.MINUTES);
+            // 存入 Redis，5 分钟有效
+            stringRedisTemplate.opsForValue().set(EMAIL_CODE_PREFIX + sendEmail, code, 5, TimeUnit.MINUTES);
         } catch (Exception e) {
             log.error("邮件发送失败", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "邮件发送失败");
