@@ -160,11 +160,11 @@ create table if not exists mock_interview
 -- 收藏表情包表（硬删除）
 create table if not exists emoticon_favour
 (
-    id             bigint auto_increment comment 'id' primary key,
+    id          bigint auto_increment comment 'id' primary key,
     userId      bigint                             not null comment '用户 id',
-    emoticonSrc       varchar(512)                            null comment '表情包地址',
-    createTime     datetime      default CURRENT_TIMESTAMP not null comment '创建时间',
-    updateTime     datetime      default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    emoticonSrc varchar(512)                       null comment '表情包地址',
+    createTime  datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime  datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     index idx_userId (userId)
 ) comment '收藏表情包表' collate = utf8mb4_unicode_ci;
 
@@ -183,3 +183,22 @@ create table if not exists  `user_third_auth` (
    primary key (`id`),
    unique key `idx_platform_openid` (`platform`,`openid`)
 ) comment '第三方用户关联表' collate = utf8mb4_general_ci;
+
+-- 用户打赏记录表
+CREATE TABLE if not exists `donation_records`
+(
+    `id`             BIGINT AUTO_INCREMENT COMMENT '打赏记录ID',
+    `donorId`        BIGINT COMMENT '打赏用户ID',
+    `amount`         DECIMAL(15, 2) NOT NULL COMMENT '打赏金额（精度：分）',
+    `remark`         VARCHAR(512)            DEFAULT NULL COMMENT '转账说明/备注',
+    `isDelete`       tinyint                 default 0 not null comment '是否删除',
+    `createTime`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updateTime`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    -- 索引
+    INDEX `idx_donor` (`donorId`),
+    -- 外键约束
+    CONSTRAINT `fk_donor_user` FOREIGN KEY (`donorId`) REFERENCES `user` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='用户打赏记录表';
