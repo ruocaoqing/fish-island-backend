@@ -3,6 +3,7 @@ package com.cong.fishisland.websocket.listener;
 
 import com.alibaba.fastjson.JSON;
 import com.cong.fishisland.datasource.ai.AIChatDataSource;
+import com.cong.fishisland.manager.AiManager;
 import com.cong.fishisland.model.entity.chat.RoomMessage;
 import com.cong.fishisland.model.enums.MessageTypeEnum;
 import com.cong.fishisland.model.vo.ai.AiResponse;
@@ -32,14 +33,15 @@ import java.util.List;
  * @author zhongzb create on 2022/08/26
  */
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
-public class AIQuestionAnswerListener {
+public class AIQuestionAnswerListenerV2 {
     private final WebSocketService webSocketService;
     @Qualifier("siliconFlowDataSource")
     private final AIChatDataSource siliconFlowDataSource;
     @Qualifier("chutesAI2DataSource")
     private final AIChatDataSource chutesAI2DataSource;
+    private final AiManager aiManager;
     private final RoomMessageService roomMessageService;
     // 系统预设
     private final String SYSTEM_PROMPT = "你是摸鱼小助手，你的任务是负责解决摸鱼用户的各种问题，" +
@@ -78,17 +80,17 @@ public class AIQuestionAnswerListener {
         }});
 
         // 调用 AI
-        AiResponse aiResponse = siliconFlowDataSource.getAiResponse(requestMessages, "internlm/internlm2_5-20b-chat");
-
+//        AiResponse aiResponse = siliconFlowDataSource.getAiResponse(requestMessages, "internlm/internlm2_5-20b-chat");
+        String aiResult = aiManager.doChat("", content);
         // 添加 AI 响应消息
         SiliconFlowRequest.Message assistantMessage = new SiliconFlowRequest.Message() {{
             setRole("assistant");
-            setContent(aiResponse.getAnswer());
+            setContent(aiResult);
         }};
         messages.add(assistantMessage);
 
         //AI 回答
-        sendAndSaveAiMessage(aiResponse.getAnswer(), message);
+        sendAndSaveAiMessage(aiResult, message);
 
     }
 
