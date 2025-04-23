@@ -145,6 +145,9 @@ public class DonationRecordsController {
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<DonationRecords> donationRecordsVOPage = donationRecordsService.page(new Page<>(current, size),
                 donationRecordsService.getQueryWrapper(donationRecordsQueryRequest));
+        if (donationRecordsVOPage.getRecords().isEmpty()){
+            return ResultUtils.success(new Page<>());
+        }
         return ResultUtils.success(donationRecordsService.getRecordsVOPage(donationRecordsVOPage));
     }
 

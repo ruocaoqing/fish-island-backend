@@ -1,6 +1,7 @@
 package com.cong.fishisland.model.vo.donation;
 
 import com.cong.fishisland.model.entity.donation.DonationRecords;
+import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.UserVO;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -41,7 +42,7 @@ public class DonationRecordsVO implements Serializable {
     /**
      * 关联的捐赠用户信息
      */
-    private UserVO donorUser;
+    private LoginUserVO donorUser;
 
     /**
      * 创建时间
@@ -50,20 +51,6 @@ public class DonationRecordsVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 包装类转对象
-     *
-     * @param donationRecordsVO
-     * @return
-     */
-    public static DonationRecords voToObj(DonationRecordsVO donationRecordsVO) {
-        if (donationRecordsVO == null) {
-            return null;
-        }
-        DonationRecords donationRecords = new DonationRecords();
-        BeanUtils.copyProperties(donationRecordsVO, donationRecords);
-        return donationRecords;
-    }
 
     /**
      * 对象转包装类

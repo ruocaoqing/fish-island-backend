@@ -128,8 +128,7 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
         if (userId != null && userId > 0) {
             user = userService.getById(userId);
         }
-        UserVO userVO = userService.getUserVO(user);
-        donationRecordsVO.setDonorUser(userVO);
+        donationRecordsVO.setDonorUser(userService.getLoginUserVO(user));
 
         return donationRecordsVO;
     }
@@ -159,7 +158,7 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
             if (userIdUserListMap.containsKey(userId)) {
                 donorUser = userIdUserListMap.get(userId).get(0);
             }
-            donationRecordsVO.setDonorUser(userService.getUserVO(donorUser));
+            donationRecordsVO.setDonorUser(userService.getLoginUserVO(donorUser));
             return donationRecordsVO;
 
         }).collect(Collectors.toList());
