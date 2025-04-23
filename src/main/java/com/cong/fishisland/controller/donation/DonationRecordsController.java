@@ -77,10 +77,10 @@ public class DonationRecordsController {
         // 判断是否存在
         DonationRecords oldDonationRecords = donationRecordsService.getById(id);
         ThrowUtils.throwIf(oldDonationRecords == null, ErrorCode.NOT_FOUND_ERROR);
-        // 校验 donorId 是否存在用户表中
-        Long donorId = donationRecordsUpdateRequest.getDonorId();
-        if (donorId != null) {
-            User user = userService.getById(donorId);
+        // 校验 userId 是否存在用户表中
+        Long userId = donationRecordsUpdateRequest.getUserId();
+        if (userId != null) {
+            User user = userService.getById(userId);
             ThrowUtils.throwIf(user == null, ErrorCode.PARAMS_ERROR, "该打赏用户不存在");
         }
         // 构建更新对象
@@ -88,7 +88,7 @@ public class DonationRecordsController {
         donationRecords.setId(id);
         donationRecords.setAmount(donationRecordsUpdateRequest.getAmount());
         donationRecords.setRemark(donationRecordsUpdateRequest.getRemark());
-        donationRecords.setDonorId(donorId);
+        donationRecords.setUserId(userId);
 
         boolean result = donationRecordsService.updateById(donationRecords);
         return ResultUtils.success(result);

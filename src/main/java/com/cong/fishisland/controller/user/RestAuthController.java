@@ -51,8 +51,8 @@ public class RestAuthController {
 
     @PostConstruct
     public void init() {
-        authRequests.put(Oauth2Constant.GITHub, gitHubConfig.getAuthRequest());
-        authRequests.put(Oauth2Constant.GITEE, giteeConfig.getAuthRequest());
+//        authRequests.put(Oauth2Constant.GITHub, gitHubConfig.getAuthRequest());
+//        authRequests.put(Oauth2Constant.GITEE, giteeConfig.getAuthRequest());
         // authRequests.put(Oauth2Constant.QQ, xxx);
     }
 

@@ -14,10 +14,10 @@ import org.springframework.data.repository.query.Param;
 public interface DonationRecordsMapper extends BaseMapper<DonationRecords> {
 
     /**
-     * 根据 donorId 查询打赏记录，并加锁（悲观锁）
+     * 根据 userId 查询打赏记录，并加锁（悲观锁）
      */
-    @Select("SELECT * FROM donation_records WHERE donorId = #{donorId} FOR UPDATE")
-    DonationRecords selectByDonorIdForUpdate(@Param("donorId") Long donorId);
+    @Select("SELECT * FROM donation_records WHERE userId = #{userId} FOR UPDATE")
+    DonationRecords selectByUserIdForUpdate(@Param("userId") Long userId);
 
 }
 

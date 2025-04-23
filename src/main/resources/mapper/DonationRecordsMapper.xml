@@ -6,7 +6,7 @@
 
     <resultMap id="BaseResultMap" type="com.cong.fishisland.model.entity.donation.DonationRecords">
         <id property="id" column="id"/>
-        <result property="donorId" column="donor_id"/>
+        <result property="userId" column="donor_id"/>
         <result property="amount" column="amount"/>
         <result property="remark" column="remark"/>
         <result property="createTime" column="create_time"/>
@@ -15,7 +15,7 @@
 
     <sql id="Base_Column_List">
         id
-        ,donorId,amount,remark,
+        ,userId,amount,remark,
         createTime,updateTime
     </sql>
 </mapper>

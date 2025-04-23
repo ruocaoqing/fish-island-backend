@@ -54,7 +54,7 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
         }
         // 从对象中取值
         Long id = donationRecordsQueryRequest.getId();
-        Long donorId = donationRecordsQueryRequest.getDonorId();
+        Long userId = donationRecordsQueryRequest.getUserId();
         BigDecimal amount = donationRecordsQueryRequest.getAmount();
         String remark = donationRecordsQueryRequest.getRemark();
         String sortField = donationRecordsQueryRequest.getSortField();
@@ -62,7 +62,7 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
 
         // 补充需要的查询条件
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
-        queryWrapper.eq(ObjectUtils.isNotEmpty(id), "donorId", donorId);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(id), "userId", userId);
         queryWrapper.eq(ObjectUtils.isNotEmpty(amount), "amount", amount);
         queryWrapper.like(StringUtils.isNotBlank(remark), "remark", remark);
         // 排序规则
@@ -78,19 +78,19 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
     @Transactional(rollbackFor = Exception.class)
     public Long createRecord(DonationRecordsAddRequest donationRecordsAddRequest) {
         // 参数校验
-        if (donationRecordsAddRequest == null || donationRecordsAddRequest.getDonorId() == null) {
+        if (donationRecordsAddRequest == null || donationRecordsAddRequest.getUserId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "新增打赏记录失败");
         }
 
-        Long donorId = donationRecordsAddRequest.getDonorId();
+        Long userId = donationRecordsAddRequest.getUserId();
         BigDecimal amount = donationRecordsAddRequest.getAmount();
         String newRemark = donationRecordsAddRequest.getRemark();
 
         // 1. 加锁查询
-        DonationRecords existing = baseMapper.selectByDonorIdForUpdate(donorId);
+        DonationRecords existing = baseMapper.selectByUserIdForUpdate(userId);
 
         if (existing != null) {
-            // donorId 存在，累加 amount（必须大于等于 0）
+            // userId 存在，累加 amount（必须大于等于 0）
             if (amount != null && amount.compareTo(BigDecimal.ZERO) >= 0) {
                 existing.setAmount(existing.getAmount().add(amount));
             }
@@ -105,7 +105,7 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
             return existing.getId();
         }
 
-        // donorId 不存在，插入新记录
+        // userId 不存在，插入新记录
         DonationRecords toInsert = new DonationRecords();
         BeanUtils.copyProperties(donationRecordsAddRequest, toInsert);
 
@@ -123,10 +123,10 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
     public DonationRecordsVO getRecordVO(DonationRecords donationRecords) {
         DonationRecordsVO donationRecordsVO = DonationRecordsVO.objToVo(donationRecords);
         // 1. 关联查询用户信息
-        Long donorId = donationRecords.getDonorId();
+        Long userId = donationRecords.getUserId();
         User user = null;
-        if (donorId != null && donorId > 0) {
-            user = userService.getById(donorId);
+        if (userId != null && userId > 0) {
+            user = userService.getById(userId);
         }
         UserVO userVO = userService.getUserVO(user);
         donationRecordsVO.setDonorUser(userVO);
@@ -145,7 +145,7 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
         List<DonationRecords> donationRecordsList = donationRecordsPage.getRecords();
         Page<DonationRecordsVO> donationRecordsVoPage = new Page<>(donationRecordsPage.getCurrent(), donationRecordsPage.getSize(), donationRecordsPage.getTotal());
         // 1. 关联查询用户信息
-        Set<Long> userIdSet = donationRecordsList.stream().map(DonationRecords::getDonorId).collect(Collectors.toSet());
+        Set<Long> userIdSet = donationRecordsList.stream().map(DonationRecords::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
         if (CollUtil.isEmpty(donationRecordsList)) {
@@ -154,10 +154,10 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
         // 填充信息
         List<DonationRecordsVO> donationRecordsVOList = donationRecordsList.stream().map(donationRecords -> {
             DonationRecordsVO donationRecordsVO = DonationRecordsVO.objToVo(donationRecords);
-            Long donorId = donationRecords.getDonorId();
+            Long userId = donationRecords.getUserId();
             User donorUser = null;
-            if (userIdUserListMap.containsKey(donorId)) {
-                donorUser = userIdUserListMap.get(donorId).get(0);
+            if (userIdUserListMap.containsKey(userId)) {
+                donorUser = userIdUserListMap.get(userId).get(0);
             }
             donationRecordsVO.setDonorUser(userService.getUserVO(donorUser));
             return donationRecordsVO;

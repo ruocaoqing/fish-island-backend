@@ -51,14 +51,14 @@ class DonationRecordsServiceTest extends TestBase {
      */
     @Test
     void TestCreateRecord_NewDonor() {
-        // 场景1：donorId 不存在，应插入
+        // 场景1：userId 不存在，应插入
         DonationRecordsAddRequest req = new DonationRecordsAddRequest();
-        req.setDonorId(100L);
+        req.setUserId(100L);
         req.setAmount(new BigDecimal("50.00"));
         req.setRemark("初次打赏");
 
-        // mapper.selectByDonorIdForUpdate 返回 null，表示无历史记录
-        when(mapper.selectByDonorIdForUpdate(100L)).thenReturn(null);
+        // mapper.selectByUserIdForUpdate 返回 null，表示无历史记录
+        when(mapper.selectByUserIdForUpdate(100L)).thenReturn(null);
         // service.save(...) 调用父类方法，我们 spy 服务并 stub save
         DonationRecordsServiceImpl spyService = Mockito.spy(service);
         doReturn(true).when(spyService).save(ArgumentMatchers.any(DonationRecords.class));
@@ -84,19 +84,19 @@ class DonationRecordsServiceTest extends TestBase {
      */
     @Test
     void TestCreateRecord_ExistingDonor() {
-        // 场景2：donorId 已存在，应累加
+        // 场景2：userId 已存在，应累加
         DonationRecordsAddRequest req = new DonationRecordsAddRequest();
-        req.setDonorId(200L);
+        req.setUserId(200L);
         req.setAmount(new BigDecimal("30.00"));
         req.setRemark("Thanks");
 
         DonationRecords existing = new DonationRecords();
         existing.setId(555L);
-        existing.setDonorId(200L);
+        existing.setUserId(200L);
         existing.setAmount(new BigDecimal("20.00"));
         existing.setRemark("Old");
 
-        when(mapper.selectByDonorIdForUpdate(200L)).thenReturn(existing);
+        when(mapper.selectByUserIdForUpdate(200L)).thenReturn(existing);
 
         // spy 调用 updateById 返回 true
         DonationRecordsServiceImpl spyService = Mockito.spy(service);
@@ -120,10 +120,10 @@ class DonationRecordsServiceTest extends TestBase {
     @Test
     void TestCreateRecord_InvalidAmount() {
         DonationRecordsAddRequest req = new DonationRecordsAddRequest();
-        req.setDonorId(300L);
+        req.setUserId(300L);
         req.setAmount(new BigDecimal("-5.00"));
 
-        when(mapper.selectByDonorIdForUpdate(300L)).thenReturn(null);
+        when(mapper.selectByUserIdForUpdate(300L)).thenReturn(null);
 
         DonationRecordsServiceImpl spyService = Mockito.spy(service);
         ReflectionTestUtils.setField(spyService, "baseMapper", mapper);
@@ -139,11 +139,11 @@ class DonationRecordsServiceTest extends TestBase {
      */
     @Test
     void TestCreateRecord_Concurrent() throws InterruptedException {
-        final long donorId = 999L;
+        final long userId = 999L;
         // 初始记录：10.00
         DonationRecords initial = new DonationRecords();
         initial.setId(1L);
-        initial.setDonorId(donorId);
+        initial.setUserId(userId);
         initial.setAmount(new BigDecimal("10.00"));
         initial.setRemark("init");
 
@@ -152,7 +152,7 @@ class DonationRecordsServiceTest extends TestBase {
         CountDownLatch lockReleased = new CountDownLatch(1);
 
         // 模拟悲观锁查询：第一个线程直接返回；其他线程阻塞直到 lockReleased.countDown()
-        when(mapper.selectByDonorIdForUpdate(donorId)).thenAnswer(invocation -> {
+        when(mapper.selectByUserIdForUpdate(userId)).thenAnswer(invocation -> {
             if (lockTaken.compareAndSet(false, true)) {
                 // 第一个线程拿到“锁”
                 return initial;
@@ -187,7 +187,7 @@ class DonationRecordsServiceTest extends TestBase {
                 try {
                     startLatch.await();
                     DonationRecordsAddRequest req = new DonationRecordsAddRequest();
-                    req.setDonorId(donorId);
+                    req.setUserId(userId);
                     req.setAmount(tip);
                     req.setRemark(null);
                     spyService.createRecord(req);

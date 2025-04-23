@@ -99,7 +99,6 @@ create table if not exists post_favour
 ) comment '帖子收藏';
 
 -- 热点表
-drop table if exists hot_post;
 create table if not exists hot_post
 (
     id             bigint auto_increment comment 'id' primary key,
@@ -188,7 +187,7 @@ create table if not exists  `user_third_auth` (
 CREATE TABLE if not exists `donation_records`
 (
     `id`             BIGINT AUTO_INCREMENT COMMENT '打赏记录ID',
-    `donorId`        BIGINT COMMENT '打赏用户ID',
+    `userId`        BIGINT COMMENT '打赏用户ID',
     `amount`         DECIMAL(15, 2) NOT NULL COMMENT '打赏金额（精度：分）',
     `remark`         VARCHAR(512)            DEFAULT NULL COMMENT '转账说明/备注',
     `isDelete`       tinyint                 default 0 not null comment '是否删除',
@@ -196,9 +195,9 @@ CREATE TABLE if not exists `donation_records`
     `updateTime`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     -- 索引
-    INDEX `idx_donor` (`donorId`),
+    INDEX `idx_donor` (`userId`),
     -- 外键约束
-    CONSTRAINT `fk_donor_user` FOREIGN KEY (`donorId`) REFERENCES `user` (`id`)
+    CONSTRAINT `fk_donor_user` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='用户打赏记录表';

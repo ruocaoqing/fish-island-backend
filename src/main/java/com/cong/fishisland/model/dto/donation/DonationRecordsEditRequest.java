@@ -16,7 +16,7 @@ public class DonationRecordsEditRequest implements Serializable {
     /**
      * 打赏用户ID
      */
-    private Long donorId;
+    private Long userId;
 
     /**
      * 打赏金额（精度：分）
