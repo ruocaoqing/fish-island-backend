@@ -70,7 +70,7 @@ public class SmzdmDataSource implements DataSource {
                 .sort(CategoryTypeEnum.GOODS_SHARE.getValue())
                 .name("什么值得买热榜")
                 .category(CategoryTypeEnum.GOODS_SHARE.getValue())
-                .updateInterval(UpdateIntervalEnum.HALF_HOUR.getValue())
+                .updateInterval(UpdateIntervalEnum.TWO_HOUR.getValue())
                 .iconUrl("https://www.smzdm.com/favicon.ico")
                 .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
                 .typeName("什么值得买")
