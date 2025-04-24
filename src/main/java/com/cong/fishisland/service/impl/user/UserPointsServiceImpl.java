@@ -53,7 +53,8 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         return true;
     }
 
-    private void updatePoints(Long userId, Integer points, boolean isSignIn) {
+    @Override
+    public void updatePoints(Long userId, Integer points, boolean isSignIn) {
         UserPoints userPoints = this.getById(userId);
         userPoints.setPoints(userPoints.getPoints() + points);
         //积分除以 100去整计算等级

@@ -12,5 +12,7 @@ public interface UserPointsService extends IService<UserPoints> {
 
     boolean signIn();
 
+    void updatePoints(Long userId, Integer points, boolean isSignIn);
+
     void addSpeakPoint(Long userId);
 }
