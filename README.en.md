@@ -44,7 +44,7 @@ _✨ Open Source 🌟 One-Stop Procrastination Website ✨_
 > Live Demo Links 🔗
 >
 > Latest Version (Domain expires 2025.09): https://fish.codebug.icu/
-> Stable Version: http://yucoder.cn/
+> Stable Version: https://yucoder.cn/
 >
 > Backend Repository 🌈: https://github.com/lhccong/fish-island-backend
 >

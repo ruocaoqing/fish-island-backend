@@ -44,7 +44,7 @@ _✨ 开源🌟一站式摸鱼网 ✨_
 > 在线体验地址🔗
 >
 > 最新版（域名 2025.09 过期）：https://fish.codebug.icu/
-> 稳定版：http://yucoder.cn/
+> 稳定版：https://yucoder.cn/
 >
 > 后端地址🌈：https://github.com/lhccong/fish-island-backend
 >
