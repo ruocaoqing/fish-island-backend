@@ -10,7 +10,7 @@ import lombok.Data;
  * @author cong
  */
 @Data
-@ApiModel(value = "创建红包请求")
+//@ApiModel(value = "创建红包请求")
 public class CreateRedPacketRequest {
     
     /**
@@ -30,4 +30,9 @@ public class CreateRedPacketRequest {
      */
     @ApiModelProperty(value = "红包类型：1-随机红包，2-平均红包", required = true, example = "1")
     private Integer type;
+
+    /**
+     * 红包名称
+     */
+    private String name;
 } 

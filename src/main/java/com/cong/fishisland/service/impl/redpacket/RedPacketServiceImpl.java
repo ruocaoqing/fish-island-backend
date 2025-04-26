@@ -66,6 +66,7 @@ public class RedPacketServiceImpl implements RedPacketService {
         // 创建红包对象
         RedPacket redPacket = new RedPacket();
         redPacket.setId(redPacketId);
+        redPacket.setName(request.getName());
         redPacket.setCreatorId(loginUser.getId());
         redPacket.setTotalAmount(request.getTotalAmount());
         redPacket.setCount(request.getCount());

@@ -22,6 +22,11 @@ public class RedPacket implements Serializable {
      * 红包创建者ID
      */
     private Long creatorId;
+
+    /**
+     * 红包名称
+     */
+    private String name;
     
     /**
      * 红包总金额（积分）
