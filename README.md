@@ -155,7 +155,7 @@ _✨ 开源🌟一站式摸鱼网 ✨_
 
 - 各大公众号转发。
 
-  <img src="/Users/Cong/Library/Containers/com.tencent.WeWorkMac/Data/Documents/Profiles/6E3469537668173E076621F7A46853C6/Caches/Images/2025-04/e5b9469ef1c79144195ec1a4d22a7142_HD/企业微信截图_f81c97a8-c32b-48da-a33d-e96ebc029326.png" alt="企业微信截图_f81c97a8-c32b-48da-a33d-e96ebc029326" style="zoom: 50%;" />
+  <img src="./doc/img/image-wchat.png" alt="wchat" style="zoom: 50%;" />
 
 
 
@@ -169,7 +169,7 @@ _✨ 开源🌟一站式摸鱼网 ✨_
 
 ### 后端
 
-- 执行初始化 SQL  [create_table.sql](./fish-island-backend/sql/create_table.sql)
+- 执行初始化 SQL  [create_table.sql](./sql/create_table.sql)
 
 - 更改 MySQL 地址、Redis 地址、Minio 地址、邮箱发送配置
 
