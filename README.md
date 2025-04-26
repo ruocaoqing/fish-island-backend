@@ -11,8 +11,6 @@
 
 
 
-<div align="center">
-
 
 # 摸鱼岛
 
