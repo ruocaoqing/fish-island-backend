@@ -278,8 +278,8 @@ public class RedPacketServiceImpl implements RedPacketService {
 
         // 计算平均金额
         int averageAmount = redPacket.getTotalAmount() / redPacket.getCount();
-        // 设置最大金额为平均金额的3倍
-        int maxAllowedAmount = averageAmount * 3;
+        // 设置最大金额为平均金额的2倍
+        int maxAllowedAmount = averageAmount * 2;
 
         // 随机生成金额，保证每个红包至少有1积分
         int minAmount = 1;
