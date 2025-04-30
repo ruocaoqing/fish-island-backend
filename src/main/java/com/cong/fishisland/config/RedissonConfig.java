@@ -2,6 +2,7 @@ package com.cong.fishisland.config;
 
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -29,7 +30,7 @@ public class RedissonConfig {
 
         config.useSingleServer()
                 .setAddress(redisAddress)
-                .setUsername(username)
+                .setUsername(StringUtils.isBlank(username)? null : username)
                 .setPassword(password != null && !password.isEmpty() ? password : null)
                 .setConnectionPoolSize(10)
                 .setConnectionMinimumIdleSize(2);

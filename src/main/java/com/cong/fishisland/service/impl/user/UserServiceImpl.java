@@ -340,16 +340,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 获取当前登录用户
-        User loginUser = this.getLoginUser();
-
-        // 用户必须登录
+        User loginUser = this.getOne(new QueryWrapper<User>().eq("email", email));
         if (loginUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"请先登录");
-        }
-
-        // 确保输入的邮箱与当前登录用户的邮箱一致
-        if (!email.equals(loginUser.getEmail())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱与当前用户邮箱不一致，请输入正确邮箱");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该邮箱未注册");
         }
 
         // 使用 Redisson 限流，一分钟最多 10 次
