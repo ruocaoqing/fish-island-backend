@@ -1,6 +1,7 @@
 package com.cong.fishisland.model.ws.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,8 +30,17 @@ public class Sender {
     @JsonProperty("level")
     private int level;
 
+    @ApiModelProperty(value = "用户简介")
+    private String userProfile;
+
     @JsonProperty("avatarFramerUrl")
     private String avatarFramerUrl;
+
+    @ApiModelProperty(value = "用户称号 ID")
+    private Long titleId;
+
+    @ApiModelProperty(value = "用户称号ID列表")
+    private String titleIdList;
 
     @JsonProperty("isAdmin")
     private boolean isAdmin;

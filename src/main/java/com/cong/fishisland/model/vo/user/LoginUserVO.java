@@ -70,6 +70,16 @@ public class LoginUserVO implements Serializable {
     private String avatarFramerUrl;
 
     /**
+     * 用户穿戴的称号 ID
+     */
+    private Long titleId;
+
+    /**
+     * 用户拥有的称号 ID 列表 JSON
+     */
+    private String titleIdList;
+
+    /**
      * 用户等级
      */
     @TableField(value = "level")

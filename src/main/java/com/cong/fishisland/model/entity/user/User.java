@@ -81,7 +81,7 @@ public class User implements Serializable {
     /**
      * 用户穿戴的称号 ID
      */
-    private String titleId;
+    private Long titleId;
 
     /**
      * 用户拥有的称号 ID 列表 JSON

@@ -370,6 +370,9 @@ public class WebSocketServiceImpl implements WebSocketService {
         userChatResponse.setName(currentUser.getUserName());
         userChatResponse.setAvatar(currentUser.getUserAvatar());
         userChatResponse.setAvatarFramerUrl(currentUser.getAvatarFramerUrl());
+        userChatResponse.setTitleId(currentUser.getTitleId());
+        userChatResponse.setTitleIdList(currentUser.getTitleIdList());
+        userChatResponse.setUserProfile(currentUser.getUserProfile());
         //目前为一级
         userChatResponse.setLevel(loginUserVO.getLevel());
         userChatResponse.setIsAdmin(currentUser.getUserRole().equals(UserConstant.ADMIN_ROLE) ?

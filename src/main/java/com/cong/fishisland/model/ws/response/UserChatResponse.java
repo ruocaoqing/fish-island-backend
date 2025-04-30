@@ -24,6 +24,15 @@ public class UserChatResponse {
     @ApiModelProperty(value = "头像框 URL")
     private String avatarFramerUrl;
 
+    @ApiModelProperty(value = "用户简介")
+    private String userProfile;
+
+    @ApiModelProperty(value = "用户称号 ID")
+    private Long titleId;
+
+    @ApiModelProperty(value = "用户称号ID列表")
+    private String titleIdList;
+
     @ApiModelProperty(value = "用户积分")
     private Integer points;
 
