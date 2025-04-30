@@ -79,6 +79,16 @@ public class User implements Serializable {
     private String avatarFramerList;
 
     /**
+     * 用户穿戴的称号 ID
+     */
+    private String titleId;
+
+    /**
+     * 用户拥有的称号 ID 列表 JSON
+     */
+    private String titleIdList;
+
+    /**
      * 创建时间
      */
     private Date createTime;

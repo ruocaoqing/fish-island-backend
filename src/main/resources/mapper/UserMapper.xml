@@ -14,6 +14,8 @@
         <result property="userName" column="userName" />
         <result property="avatarFramerList" column="avatarFramerList" />
         <result property="avatarFramerUrl" column="avatarFramerUrl" />
+        <result property="titleIdList" column="titleIdList" />
+        <result property="titleId" column="titleId" />
         <result property="userAvatar" column="userAvatar" />
         <result property="userProfile" column="userProfile" />
         <result property="userRole" column="userRole" />
@@ -24,6 +26,7 @@
 
     <sql id="Base_Column_List">
         id,userAccount,userPassword,unionId,mpOpenId,email,avatarFramerList,avatarFramerUrl,
+        titleIdList,titleId,
         userName,userAvatar,userProfile,userRole,createTime,
         updateTime,isDelete
     </sql>

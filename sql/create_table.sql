@@ -32,6 +32,20 @@ ALTER TABLE user
 ALTER TABLE user
     ADD COLUMN avatarFramerUrl  VARCHAR(256) NULL COMMENT '用户头像框地址' after userAvatar,
     ADD COLUMN avatarFramerList VARCHAR(256) NULL COMMENT '用户头像框 ID Json 列表' after avatarFramerUrl;
+ALTER TABLE user
+    ADD COLUMN titleId  int NULL default 0 COMMENT '用户称号 ID 默认为 0 等级称号 -1 为管理员称号' after userAvatar;
+ALTER TABLE user
+    ADD COLUMN titleIdList VARCHAR(256) NULL COMMENT '用户称号 ID Json 列表' after titleId;
+
+-- 用户称号表
+create table if not exists user_title
+(
+    titleId        BIGINT auto_increment comment '称号 ID' PRIMARY KEY,
+    name           VARCHAR(256) comment '称号名称',
+    createTime     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete       tinyint  default 0                 not null comment '是否删除'
+) comment '用户称号' collate = utf8mb4_unicode_ci;
 
 -- 头像框表
 create table if not exists avatar_frame
