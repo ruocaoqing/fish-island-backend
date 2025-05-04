@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cong.fishisland.mapper.hero.HeroMapper">
+
+    <resultMap id="BaseResultMap" type="com.cong.fishisland.model.entity.hero.Hero">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="ename" column="ename" jdbcType="VARCHAR"/>
+            <result property="cname" column="cname" jdbcType="VARCHAR"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="release_date" column="release_date" jdbcType="DATE"/>
+            <result property="new_type" column="new_type" jdbcType="TINYINT"/>
+            <result property="primary_type" column="primary_type" jdbcType="TINYINT"/>
+            <result property="secondary_type" column="secondary_type" jdbcType="TINYINT"/>
+            <result property="skins" column="skins" jdbcType="VARCHAR"/>
+            <result property="official_link" column="official_link" jdbcType="VARCHAR"/>
+            <result property="moss_id" column="moss_id" jdbcType="BIGINT"/>
+            <result property="race" column="race" jdbcType="VARCHAR"/>
+            <result property="faction" column="faction" jdbcType="VARCHAR"/>
+            <result property="identity" column="identity" jdbcType="VARCHAR"/>
+            <result property="region" column="region" jdbcType="VARCHAR"/>
+            <result property="ability" column="ability" jdbcType="VARCHAR"/>
+            <result property="height" column="height" jdbcType="VARCHAR"/>
+            <result property="quote" column="quote" jdbcType="VARCHAR"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,ename,cname,
+        title,release_date,new_type,
+        primary_type,secondary_type,skins,
+        official_link,moss_id,race,
+        faction,identity,region,
+        ability,height,quote,
+        createTime,updateTime
+    </sql>
+    <select id="selectRandomHero" resultType="com.cong.fishisland.model.entity.hero.Hero">
+        SELECT * FROM hero
+        ORDER BY RAND()
+        LIMIT 1
+    </select>
+    <select id="selectNewestHero" resultType="com.cong.fishisland.model.entity.hero.Hero">
+        SELECT *
+        FROM hero
+        WHERE releaseDate IS NOT NULL
+        ORDER BY releaseDate DESC
+        LIMIT 1
+    </select>
+</mapper>
