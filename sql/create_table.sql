@@ -50,13 +50,13 @@ create table if not exists user_title
 -- 头像框表
 create table if not exists avatar_frame
 (
-    frameId        BIGINT auto_increment comment '头像框 ID' PRIMARY KEY,
-    url            VARCHAR(256) comment '头像框名称',
-    name           VARCHAR(256) comment '头像框名称',
-    points         INT      DEFAULT 1 comment '头像框所需兑换积分',
-    createTime     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
-    updateTime     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    isDelete       tinyint  default 0                 not null comment '是否删除'
+    frameId    BIGINT auto_increment comment '头像框 ID' PRIMARY KEY,
+    url        VARCHAR(256) comment '头像框名称',
+    name       VARCHAR(256) comment '头像框名称',
+    points     INT      DEFAULT 1 comment '头像框所需兑换积分',
+    createTime datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 not null comment '是否删除'
 ) comment '头像框' collate = utf8mb4_unicode_ci;
 
 -- 用户积分表
@@ -182,31 +182,32 @@ create table if not exists emoticon_favour
 ) comment '收藏表情包表' collate = utf8mb4_unicode_ci;
 
 -- 第三方用户关联表
-create table if not exists  `user_third_auth` (
-   `id` bigint(20) not null auto_increment,
-   `user_id` bigint(20) not null comment '本地用户id',
-   `nickname` varchar(200) collate utf8mb4_general_ci default null comment '昵称',
-   `avatar` varchar(200) collate utf8mb4_general_ci default null comment '头像',
-   `platform` varchar(20) character set utf8mb4 collate utf8mb4_general_ci not null comment '平台：github/gitee',
-   `openid` varchar(100) character set utf8mb4 collate utf8mb4_general_ci not null comment '平台用户id',
-   `access_token` varchar(500) character set utf8mb4 collate utf8mb4_general_ci default null comment 'access_token',
-   `refresh_token` varchar(500) character set utf8mb4 collate utf8mb4_general_ci default null comment 'refresh_token',
-   `expire_time` datetime default null comment '过期时间',
-   `raw_data` json default null comment '原始响应数据',
-   primary key (`id`),
-   unique key `idx_platform_openid` (`platform`,`openid`)
+create table if not exists `user_third_auth`
+(
+    `id`            bigint(20)                                                    not null auto_increment,
+    `user_id`       bigint(20)                                                    not null comment '本地用户id',
+    `nickname`      varchar(200) collate utf8mb4_general_ci                       default null comment '昵称',
+    `avatar`        varchar(200) collate utf8mb4_general_ci                       default null comment '头像',
+    `platform`      varchar(20) character set utf8mb4 collate utf8mb4_general_ci  not null comment '平台：github/gitee',
+    `openid`        varchar(100) character set utf8mb4 collate utf8mb4_general_ci not null comment '平台用户id',
+    `access_token`  varchar(500) character set utf8mb4 collate utf8mb4_general_ci default null comment 'access_token',
+    `refresh_token` varchar(500) character set utf8mb4 collate utf8mb4_general_ci default null comment 'refresh_token',
+    `expire_time`   datetime                                                      default null comment '过期时间',
+    `raw_data`      json                                                          default null comment '原始响应数据',
+    primary key (`id`),
+    unique key `idx_platform_openid` (`platform`, `openid`)
 ) comment '第三方用户关联表' collate = utf8mb4_general_ci;
 
 -- 用户打赏记录表
 CREATE TABLE if not exists `donation_records`
 (
-    `id`             BIGINT AUTO_INCREMENT COMMENT '打赏记录ID',
-    `userId`        BIGINT COMMENT '打赏用户ID',
-    `amount`         DECIMAL(15, 2) NOT NULL COMMENT '打赏金额（精度：分）',
-    `remark`         VARCHAR(512)            DEFAULT NULL COMMENT '转账说明/备注',
-    `isDelete`       tinyint                 default 0 not null comment '是否删除',
-    `createTime`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updateTime`     DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `id`         BIGINT AUTO_INCREMENT COMMENT '打赏记录ID',
+    `userId`     BIGINT COMMENT '打赏用户ID',
+    `amount`     DECIMAL(15, 2) NOT NULL COMMENT '打赏金额（精度：分）',
+    `remark`     VARCHAR(512)            DEFAULT NULL COMMENT '转账说明/备注',
+    `isDelete`   tinyint                 default 0 not null comment '是否删除',
+    `createTime` DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updateTime` DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     -- 索引
     INDEX `idx_donor` (`userId`),
@@ -215,3 +216,29 @@ CREATE TABLE if not exists `donation_records`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='用户打赏记录表';
+
+CREATE TABLE IF NOT EXISTS hero
+(
+    id            BIGINT AUTO_INCREMENT COMMENT '主键ID' PRIMARY KEY,
+    ename         VARCHAR(50)                        NOT NULL COMMENT '英雄英文标识(如177)',
+    cname         VARCHAR(50)                        NOT NULL COMMENT '中文名(如苍)',
+    title         VARCHAR(100)                       NOT NULL COMMENT '称号(如苍狼末裔)',
+    releaseDate   DATE                               NULL COMMENT '上线时间',
+    newType       TINYINT  DEFAULT 0 COMMENT '新英雄标识(0常规/1新英雄)',
+    primaryType   TINYINT                            NOT NULL COMMENT '主定位(1战士/2法师/3坦克/4刺客/5射手/6辅助)',
+    secondaryType TINYINT COMMENT '副定位(1战士/2法师/3坦克/4刺客/5射手/6辅助)',
+    skins         VARCHAR(500) COMMENT '皮肤列表(用|分隔，如苍狼末裔|维京掠夺者|苍林狼骑)',
+    officialLink  VARCHAR(255) COMMENT '官网详情页链接',
+    mossId        BIGINT COMMENT '内部ID',
+    race          VARCHAR(50) COMMENT '种族[yxzz_b8]',
+    faction       VARCHAR(50) COMMENT '势力[yxsl_54]',
+    identity      VARCHAR(50) COMMENT '身份[yxsf_48]',
+    region        VARCHAR(50) COMMENT '区域[qym_e7]',
+    ability       VARCHAR(50) COMMENT '能量[nl_96]',
+    height        VARCHAR(20) COMMENT '身高[sg_30]',
+    quote         VARCHAR(255) COMMENT '经典台词[rsy_49]',
+    createTime    DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    updateTime    DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_cname (cname),
+    INDEX idx_type (primaryType)
+) COMMENT '王者荣耀英雄详情表' COLLATE = utf8mb4_unicode_ci;
