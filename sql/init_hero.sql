@@ -18,36 +18,6 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for hero
--- ----------------------------
-DROP TABLE IF EXISTS `hero`;
-CREATE TABLE `hero`  (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `ename` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '英雄英文标识(如177)',
-  `cname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '中文名(如苍)',
-  `title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '称号(如苍狼末裔)',
-  `releaseDate` date NULL DEFAULT NULL COMMENT '上线时间',
-  `newType` tinyint(4) NULL DEFAULT 0 COMMENT '新英雄标识(0常规/1新英雄)',
-  `primaryType` tinyint(4) NOT NULL COMMENT '主定位(1战士/2法师/3坦克/4刺客/5射手/6辅助)',
-  `secondaryType` tinyint(4) NULL DEFAULT NULL COMMENT '副定位(1战士/2法师/3坦克/4刺客/5射手/6辅助)',
-  `skins` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '皮肤列表(用|分隔，如苍狼末裔|维京掠夺者|苍林狼骑)',
-  `officialLink` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '官网详情页链接',
-  `mossId` bigint(20) NULL DEFAULT NULL COMMENT '内部ID',
-  `race` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '种族[yxzz_b8]',
-  `faction` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '势力[yxsl_54]',
-  `identity` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '身份[yxsf_48]',
-  `region` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '区域[qym_e7]',
-  `ability` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '能量[nl_96]',
-  `height` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '身高[sg_30]',
-  `quote` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '经典台词[rsy_49]',
-  `createTime` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `updateTime` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_cname`(`cname`) USING BTREE,
-  INDEX `idx_type`(`primaryType`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1918248699129966603 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '王者荣耀英雄详情表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
 -- Records of hero
 -- ----------------------------
 INSERT INTO `hero` VALUES (1918248698953805826, '105', '廉颇', '正义爆轰', '2015-11-26', 0, 3, NULL, '正义爆轰|地狱岩魂|无尽征程|寅虎·御盾|功夫炙烤|撼地雄心', NULL, 3627, '人类', '稷下学院', '甘丹族长', '逐鹿', '武道', '190cm', '心不老，身不灭。\r\n一次不行，那就再来十次。', '2025-05-02 18:18:23', '2025-05-02 21:36:46');

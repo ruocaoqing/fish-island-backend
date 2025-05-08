@@ -408,6 +408,12 @@ public class UserController {
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        if (userUpdateMyRequest.getUserName().length() > 10) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名不能超过10个字符");
+        }
+        if (userUpdateMyRequest.getUserProfile().length()>100){
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"个人信息字符不能超过 100");
+        }
         User loginUser = userService.getLoginUser();
         User user = new User();
         BeanUtils.copyProperties(userUpdateMyRequest, user);
