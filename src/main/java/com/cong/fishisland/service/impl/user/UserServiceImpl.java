@@ -17,6 +17,7 @@ import com.cong.fishisland.manager.EmailManager;
 import com.cong.fishisland.mapper.user.UserMapper;
 import com.cong.fishisland.mapper.user.UserThirdAuthMapper;
 import com.cong.fishisland.model.dto.user.UserQueryRequest;
+import com.cong.fishisland.model.entity.user.EmailBan;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.entity.user.UserPoints;
 import com.cong.fishisland.model.entity.user.UserThirdAuth;
@@ -25,6 +26,7 @@ import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.PlatformBindVO;
 import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
 import com.cong.fishisland.model.vo.user.UserVO;
+import com.cong.fishisland.service.EmailBanService;
 import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.service.UserService;
 import com.cong.fishisland.utils.SqlUtils;
@@ -60,15 +62,22 @@ import static com.cong.fishisland.constant.SystemConstants.SALT;
 @Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
     @Resource
     private GitHubConfig gitHubConfig;
+
     @Resource
     private UserPointsService userPointsService;
+
     @Resource
     private EmailManager emailManager;
 
     @Resource
+    private EmailBanService emailBanService;
+
+    @Resource
     StringRedisTemplate stringRedisTemplate;
+
     private static final String EMAIL_CODE_PREFIX = "email:code:";
 
     @Resource
@@ -425,7 +434,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User loginUser = this.getLoginUser();
         // 用户必须登录
         if (loginUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"请先登录");
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "请先登录");
         }
 
         // 使用 Redisson 限流，一分钟最多 10 次
@@ -707,13 +716,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 校验邮箱格式
+     * 校验邮箱
      *
      * @param email 邮箱地址
      */
     private void validateEmailFormat(String email) {
-        if (StringUtils.isBlank(email) || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        // 基本格式校验
+        if (StringUtils.isBlank(email)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
+        }
+        if (StringUtils.isBlank(email) || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
         }
+
+        // 后缀校验
+        String emailSuffix = StringUtils.substringAfter(email, "@").toLowerCase();
+        // 查询是否存在于黑名单中
+        boolean isBanned = emailBanService.lambdaQuery()
+                .eq(EmailBan::getEmailSuffix, emailSuffix)
+                .exists();
+        if (isBanned) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该邮箱属于临时邮箱，已被系统封禁，禁止注册");
+        }
     }
+
 }

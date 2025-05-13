@@ -242,3 +242,13 @@ CREATE TABLE IF NOT EXISTS hero
     INDEX idx_cname (cname),
     INDEX idx_type (primaryType)
 ) COMMENT '王者荣耀英雄详情表' COLLATE = utf8mb4_unicode_ci;
+
+create table if not exists `email_ban`
+(
+    id          BIGINT(20)                             NOT NULL AUTO_INCREMENT COMMENT '主键ID' PRIMARY KEY,
+    email       VARCHAR(256) COMMENT '被封禁的完整邮箱地址',
+    emailSuffix VARCHAR(64)                            NOT NULL COMMENT '邮箱后缀（如 .com、.net）',
+    reason      VARCHAR(256) default '临时邮箱' COMMENT '封禁理由',
+    createTime  datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime  datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间'
+) comment '邮箱封禁表' collate = utf8mb4_unicode_ci;
