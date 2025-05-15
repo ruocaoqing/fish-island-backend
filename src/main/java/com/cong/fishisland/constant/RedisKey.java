@@ -31,6 +31,16 @@ public interface RedisKey {
 
     String HOT_POST_CACHE_KEY = "hot_post_list";
 
+    /**
+     * 记录猜对英雄次数
+     */
+    String GUESS_HERO_SUCCESS_COUNT = "guess:hero:success:count";
+
+    /**
+     * 猜对英雄排行
+     */
+    String GUESS_HERO_RANKING = "guess:hero:ranking";
+
     static String getKey(String key, Object... objects) {
         return BASE_KEY + String.format(key, objects);
     }
