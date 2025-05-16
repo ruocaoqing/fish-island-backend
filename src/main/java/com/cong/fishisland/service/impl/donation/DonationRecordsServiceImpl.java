@@ -14,6 +14,7 @@ import com.cong.fishisland.model.dto.donation.DonationRecordsQueryRequest;
 import com.cong.fishisland.model.entity.donation.DonationRecords;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.vo.donation.DonationRecordsVO;
+import com.cong.fishisland.model.vo.user.LoginUserVO;
 import com.cong.fishisland.model.vo.user.UserVO;
 import com.cong.fishisland.service.DonationRecordsService;
 import com.cong.fishisland.service.UserService;
@@ -128,7 +129,9 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
         if (userId != null && userId > 0) {
             user = userService.getById(userId);
         }
-        donationRecordsVO.setDonorUser(userService.getLoginUserVO(user));
+        LoginUserVO loginUserVO = userService.getLoginUserVO(user);
+        loginUserVO.setEmail(null);
+        donationRecordsVO.setDonorUser(loginUserVO);
 
         return donationRecordsVO;
     }
@@ -158,7 +161,9 @@ public class DonationRecordsServiceImpl extends ServiceImpl<DonationRecordsMappe
             if (userIdUserListMap.containsKey(userId)) {
                 donorUser = userIdUserListMap.get(userId).get(0);
             }
-            donationRecordsVO.setDonorUser(userService.getLoginUserVO(donorUser));
+            LoginUserVO loginUserVO = userService.getLoginUserVO(donorUser);
+            loginUserVO.setEmail(null);
+            donationRecordsVO.setDonorUser(loginUserVO);
             return donationRecordsVO;
 
         }).collect(Collectors.toList());
