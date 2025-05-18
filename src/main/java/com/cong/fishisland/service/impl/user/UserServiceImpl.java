@@ -557,6 +557,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public User getLoginUserPermitNull() {
         // 先判断是否已登录
+        if (!StpUtil.isLogin()) {
+            return null;
+        }
         Object userObj = StpUtil.getTokenSession().get(SystemConstants.USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null || currentUser.getId() == null) {
