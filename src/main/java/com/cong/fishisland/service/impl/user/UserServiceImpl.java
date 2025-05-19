@@ -734,6 +734,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 后缀校验
         String emailSuffix = StringUtils.substringAfter(email, "@").toLowerCase();
+        //禁言不是 com 结尾的邮箱后缀
+        if (!emailSuffix.endsWith("com")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "除 com 邮箱外，其他邮箱禁止注册");
+        }
         // 查询是否存在于黑名单中
         boolean isBanned = emailBanService.lambdaQuery()
                 .eq(EmailBan::getEmailSuffix, emailSuffix)
