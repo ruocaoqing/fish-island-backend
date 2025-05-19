@@ -1,6 +1,7 @@
 package com.cong.fishisland.controller.hero;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import com.alibaba.fastjson.JSON;
 import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.ResultUtils;
@@ -13,6 +14,7 @@ import com.cong.fishisland.model.vo.hero.HeroVO;
 import com.cong.fishisland.model.vo.hero.SimpleHeroVO;
 import com.cong.fishisland.service.HeroService;
 import com.cong.fishisland.service.UserService;
+import com.cong.fishisland.utils.CryptoUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -63,7 +65,7 @@ public class HeroController {
      * 随机获取一个英雄数据
      */
     @GetMapping("/get/random")
-    public BaseResponse<HeroVO> getRandomHero() {
+    public BaseResponse<String> getRandomHero() {
         // 获取当前用户信息
         User loginUser = userService.getLoginUserPermitNull();
         HeroVO hero = heroService.getRandomHero();
@@ -79,8 +81,8 @@ public class HeroController {
                     10, TimeUnit.MINUTES
             );
         }
-        Objects.requireNonNull(hero).setCname(null);
-        return ResultUtils.success(hero);
+        String json = JSON.toJSONString(hero);
+        return ResultUtils.success(CryptoUtils.encryptSafely(json));
     }
 
 
