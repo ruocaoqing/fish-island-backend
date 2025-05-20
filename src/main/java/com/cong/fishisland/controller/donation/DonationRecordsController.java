@@ -52,6 +52,7 @@ public class DonationRecordsController {
 
     @PostMapping("/delete")
     @ApiOperation(value = "删除打赏记录")
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteDonation(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);

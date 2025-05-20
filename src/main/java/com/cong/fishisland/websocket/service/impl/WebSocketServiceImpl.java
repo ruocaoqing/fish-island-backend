@@ -38,6 +38,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -223,8 +224,7 @@ public class WebSocketServiceImpl implements WebSocketService {
             case CHAT:
                 MessageWrapper messageDto = JSON.parseObject(chatMessageVo.getContent(), MessageWrapper.class);
                 Message message = messageDto.getMessage();
-                //敏感词替换
-                String resultContent = wordsUtil.Replace(message.getContent());
+                String resultContent = fixMessage(message);
                 message.setContent(resultContent);
                 applicationEventPublisher.publishEvent(new AddSpeakPointEvent(this, message.getSender().getId()));
                 sendToAllOnline(WSBaseResp.builder()
@@ -281,6 +281,14 @@ public class WebSocketServiceImpl implements WebSocketService {
             default:
                 break;
         }
+    }
+
+    private @NotNull String fixMessage(Message message) {
+        //敏感词替换
+        String resultContent = wordsUtil.Replace(message.getContent());
+        //移除代码高亮符号
+        resultContent = resultContent.replaceAll("```", "");
+        return resultContent;
     }
 
     private void createDrawRoom(Channel channel, User loginUser) {
