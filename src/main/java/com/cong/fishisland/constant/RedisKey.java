@@ -46,6 +46,11 @@ public interface RedisKey {
      */
     String GUESS_HERO_RANKING = "guess:hero:ranking";
 
+    /**
+     * 表情包收藏防抖
+     */
+    String EMOTICON_FAVOUR_DEBOUNCE = "emoticon:favour:debounce:%d:%s";
+
     static String getKey(String key, Object... objects) {
         return BASE_KEY + String.format(key, objects);
     }
