@@ -3,6 +3,8 @@ package com.cong.fishisland.service.impl.user;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -10,22 +12,23 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.exception.BusinessException;
+import com.cong.fishisland.common.exception.ThrowUtils;
 import com.cong.fishisland.config.GitHubConfig;
 import com.cong.fishisland.constant.CommonConstant;
+import com.cong.fishisland.constant.NewUserDataTypeWebConstant;
 import com.cong.fishisland.constant.SystemConstants;
 import com.cong.fishisland.manager.EmailManager;
 import com.cong.fishisland.mapper.user.UserMapper;
 import com.cong.fishisland.mapper.user.UserThirdAuthMapper;
+import com.cong.fishisland.model.dto.user.NewUserDataWebRequest;
 import com.cong.fishisland.model.dto.user.UserQueryRequest;
 import com.cong.fishisland.model.entity.user.EmailBan;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.model.entity.user.UserPoints;
 import com.cong.fishisland.model.entity.user.UserThirdAuth;
+import com.cong.fishisland.model.enums.DeleteStatusEnum;
 import com.cong.fishisland.model.enums.UserRoleEnum;
-import com.cong.fishisland.model.vo.user.LoginUserVO;
-import com.cong.fishisland.model.vo.user.PlatformBindVO;
-import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
-import com.cong.fishisland.model.vo.user.UserVO;
+import com.cong.fishisland.model.vo.user.*;
 import com.cong.fishisland.service.EmailBanService;
 import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.service.UserService;
@@ -47,6 +50,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +66,9 @@ import static com.cong.fishisland.constant.SystemConstants.SALT;
 @Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    @Resource
+    private UserMapper  userMapper;
 
     @Resource
     private GitHubConfig gitHubConfig;
@@ -702,6 +709,73 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         // 2、用户存在，则登录
         return this.userLogin(userAccount, authUser.getUuid() + authUser.getUsername());
+    }
+
+
+    @Override
+    public UserDataWebVO getUserDataWebVO() {
+        //获取登录用户
+        getLoginUser();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        //删除状态 未删除
+        queryWrapper.eq("isDelete", DeleteStatusEnum.NOT_DELETED);
+        UserDataWebVO userDataWebVO = userMapper.getUserDataWebVO(queryWrapper);
+        if (userDataWebVO != null){
+            // 获取所有登录的用户ids
+            List<String> logIds = StpUtil.searchSessionId("", 0, -1, false);
+            // 如果所有登录的用户ids不为空设置具体数量，否则设置0
+            userDataWebVO.setCurrentActiveUsers(CollUtil.isEmpty(logIds)?  0:logIds.size());
+        }
+        return userDataWebVO;
+    }
+
+    /**
+     * 新增用户走势图
+     * @param request 新增用户数据请求
+     * @return 用户新增数据
+     */
+    @Override
+    public List<NewUserDataWebVO> getNewUserDataWebVO(NewUserDataWebRequest request) {
+        validNewUserDataWebRequest(request);
+        Integer type = request.getType();
+        Date beginTime = request.getBeginTime();
+        Date endTime = request.getEndTime();
+        //每周新增
+        if (NewUserDataTypeWebConstant.EVERY_WEEK.equals(type)){
+            return userMapper.getNewUserDataWebVOEveryWeek();
+        }
+        //每月新增
+        if (NewUserDataTypeWebConstant.EVERY_MONTH.equals(type)){
+            return userMapper.getNewUserDataWebVOEveryMonth();
+        }
+        //每年新增
+        if (NewUserDataTypeWebConstant.EVERY_YEAR.equals(type)){
+            return userMapper.getNewUserDataWebVOEveryYear();
+        }
+        //时间范围
+        if (NewUserDataTypeWebConstant.TIME_RANGE.equals(type) && beginTime!=null && endTime!=null){
+            return userMapper.getNewUserDataWebVOByTime(beginTime,endTime);
+        }
+        return CollUtil.newArrayList();
+    }
+
+    /**
+     * 新增用户数据校验
+     * @param request 新增用户数据请求
+     */
+    private void validNewUserDataWebRequest(NewUserDataWebRequest request){
+        ThrowUtils.throwIf(request==null,ErrorCode.PARAMS_ERROR,"数据为空");
+        Date beginTime = request.getBeginTime();
+        Date endTime = request.getEndTime();
+        //开始时间、结束时间必须同时为空或者同时不为空
+        ThrowUtils.throwIf(beginTime == null & endTime != null, ErrorCode.PARAMS_ERROR,"开始时间不能为空");
+        ThrowUtils.throwIf(beginTime != null & endTime == null, ErrorCode.PARAMS_ERROR,"结束时间不能为空");
+        if (beginTime != null & endTime != null){
+            //开始时间和结束时间不为空，开始时间不能大于结束时间
+            ThrowUtils.throwIf( beginTime.after(endTime), ErrorCode.PARAMS_ERROR,"开始时间不能大于结束时间");
+            //开始时间和结束时间范围必须在31天内
+            ThrowUtils.throwIf( DateUtil.between(beginTime, endTime, DateUnit.DAY) > 31, ErrorCode.PARAMS_ERROR,"时间范围必须在31天内");
+        }
     }
 
     private void saveGithubUser(String userAccount, AuthUser authUser) {

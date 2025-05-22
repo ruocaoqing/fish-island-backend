@@ -14,14 +14,13 @@ import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.common.exception.ThrowUtils;
 import com.cong.fishisland.model.dto.user.*;
 import com.cong.fishisland.model.entity.user.User;
-import com.cong.fishisland.model.vo.user.LoginUserVO;
-import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
-import com.cong.fishisland.model.vo.user.UserVO;
+import com.cong.fishisland.model.vo.user.*;
 import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.service.UserService;
 
 import java.util.List;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -432,5 +431,29 @@ public class UserController {
     @ApiOperation(value = "签到")
     public BaseResponse<Boolean> signIn() {
         return ResultUtils.success(userPointsService.signIn());
+    }
+
+
+    /**
+     * 用户数据（仅管理员）
+     * @return 用户数据
+     */
+    @ApiOperation(value = "用户数据（仅管理员）")
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
+    @PostMapping("/get/UserDataWebVO")
+    public BaseResponse<UserDataWebVO> getUserDataWebVO(){
+        return ResultUtils.success(userService.getUserDataWebVO());
+    }
+
+    /**
+     * 新增用户走势图（仅管理员）
+     * @param request 新增用户数据请求
+     * @return 用户新增数据
+     */
+    @ApiOperation(value = "新增用户走势图（仅管理员）")
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
+    @PostMapping("/get/NewUserDataWebVO")
+    public BaseResponse<List<NewUserDataWebVO>> getNewUserDataWebVO(@RequestBody NewUserDataWebRequest request){
+        return ResultUtils.success(userService.getNewUserDataWebVO(request));
     }
 }
