@@ -16,9 +16,9 @@ public class UserDataWebVO implements Serializable {
      */
     private Integer totalUsers;
     /**
-     * 当前活跃用户数
+     * 今日活跃用户数
      */
-    private Integer currentActiveUsers;
+    private Integer todayActiveUsers;
     /**
      * 今日新增用户数
      */

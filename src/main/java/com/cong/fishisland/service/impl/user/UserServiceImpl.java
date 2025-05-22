@@ -719,14 +719,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         //删除状态 未删除
         queryWrapper.eq("isDelete", DeleteStatusEnum.NOT_DELETED);
-        UserDataWebVO userDataWebVO = userMapper.getUserDataWebVO(queryWrapper);
-        if (userDataWebVO != null){
-            // 获取所有登录的用户ids
-            List<String> logIds = StpUtil.searchSessionId("", 0, -1, false);
-            // 如果所有登录的用户ids不为空设置具体数量，否则设置0
-            userDataWebVO.setCurrentActiveUsers(CollUtil.isEmpty(logIds)?  0:logIds.size());
-        }
-        return userDataWebVO;
+        return userMapper.getUserDataWebVO(queryWrapper);
     }
 
     /**

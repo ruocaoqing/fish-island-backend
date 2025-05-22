@@ -32,9 +32,11 @@
     </sql>
     <select id="getUserDataWebVO" resultType="com.cong.fishisland.model.vo.user.UserDataWebVO">
         SELECT
-            -- 全部用户人数
+            -- 总用户数
             COUNT(*)                                                          AS totalUsers,
-            -- 今日新增人数
+            -- 今日活跃用户数
+            SUM(CASE WHEN DATE (updateTime) = CURDATE() THEN 1 ELSE 0 END)    AS todayActiveUsers,
+            -- 今日新增用户数
             SUM(CASE WHEN DATE (createTime) = CURDATE() THEN 1 ELSE 0 END)    AS todayNewUsers,
             -- 本月新增用户数
             SUM(CASE WHEN DATE_FORMAT(createTime, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m') THEN 1 ELSE 0 END) AS thisMonthNewUsers
