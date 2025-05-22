@@ -2,11 +2,10 @@ package com.cong.fishisland.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.cong.fishisland.model.dto.user.NewUserDataWebRequest;
 import com.cong.fishisland.model.dto.user.UserQueryRequest;
 import com.cong.fishisland.model.entity.user.User;
-import com.cong.fishisland.model.vo.user.LoginUserVO;
-import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
-import com.cong.fishisland.model.vo.user.UserVO;
+import com.cong.fishisland.model.vo.user.*;
 
 import java.util.List;
 
@@ -163,4 +162,18 @@ public interface UserService extends IService<User> {
      * @return {@link TokenLoginUserVo }
      */
     TokenLoginUserVo userLoginByGithub(AuthCallback callback);
+
+    /**
+     * 用户数据
+     *
+     * @return {@link UserDataWebVO}
+     */
+    UserDataWebVO getUserDataWebVO();
+
+    /**
+     * 新用户数据
+     *
+     * @return {@link NewUserDataWebVO}
+     */
+    List<NewUserDataWebVO> getNewUserDataWebVO(NewUserDataWebRequest request);
 }
