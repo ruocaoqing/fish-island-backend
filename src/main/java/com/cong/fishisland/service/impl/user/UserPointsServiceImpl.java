@@ -2,6 +2,10 @@ package com.cong.fishisland.service.impl.user;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cong.fishisland.common.ErrorCode;
+import com.cong.fishisland.common.exception.BusinessException;
+import com.cong.fishisland.common.exception.ThrowUtils;
+import com.cong.fishisland.constant.PointConstant;
 import com.cong.fishisland.model.entity.user.UserPoints;
 import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.mapper.user.UserPointsMapper;
@@ -47,7 +51,7 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         }
 
         // **数据库更新积分**
-        updatePoints(Long.valueOf(loginUserId.toString()), 10, true);
+        updatePoints(Long.valueOf(loginUserId.toString()), PointConstant.SIGN_IN_POINT, true);
 
 
         return true;
@@ -95,7 +99,7 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         }
 
         // **数据库增加积分**
-        updatePoints(userId, 1, false);
+        updatePoints(userId, PointConstant.SPEAK_POINT, false);
 
         // **更新 Redis 计数**
         LocalDateTime now = LocalDateTime.now();
@@ -105,6 +109,23 @@ public class UserPointsServiceImpl extends ServiceImpl<UserPointsMapper, UserPoi
         RedisUtils.inc(speakKey, expireDuration);
 
     }
+
+    /**
+     * 扣除积分
+     * @param userId 用户ID
+     * @param pointsToDeduct 要扣除的积分
+     */
+    @Override
+    public void deductPoints(Long userId, Integer pointsToDeduct) {
+        // 检查用户积分是否足够
+        UserPoints userPoints = this.getById(userId);
+        ThrowUtils.throwIf(userPoints == null, ErrorCode.NOT_FOUND_ERROR, "用户积分不存在");
+        int availablePoints = userPoints.getPoints() - userPoints.getUsedPoints();
+        ThrowUtils.throwIf(availablePoints < pointsToDeduct, ErrorCode.OPERATION_ERROR, "用户积分不足");
+        userPoints.setUsedPoints(userPoints.getUsedPoints() + pointsToDeduct);
+        this.updateById(userPoints);
+    }
+
 }
 
 

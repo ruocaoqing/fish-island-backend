@@ -51,6 +51,16 @@ public interface RedisKey {
      */
     String EMOTICON_FAVOUR_DEBOUNCE = "emoticon:favour:debounce:%d:%s";
 
+    /**
+     * 用户改名限制 user:rename:{userId}:{yyyyMM}
+     */
+    String USER_RENAME_LIMIT = "user:rename:%d:%s";
+
+    /**
+     * 新增防抖相关常量
+     */
+    String USER_DEBOUNCE_PREFIX = "user:debounce:";
+
     static String getKey(String key, Object... objects) {
         return BASE_KEY + String.format(key, objects);
     }
