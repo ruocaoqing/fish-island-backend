@@ -442,9 +442,10 @@ public class UserController {
         user.setUserAvatar(userUpdateMyRequest.getUserAvatar());
         user.setUserProfile(userProfile);
         user.setId(loginUser.getId());
-        boolean result = userService.updateById(user);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-
+        if (!StringUtils.isAllBlank(user.getUserName(),user.getUserAvatar(), userProfile)){
+            boolean result = userService.updateById(user);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        }
         // ========== 修改后逻辑：仅在更新成功后处理积分 ==========
         if (StringUtils.isNotBlank(loginUserUserName) && !userName.equals(loginUserUserName)) {
             String redisKey = RedisKey.getKey(
