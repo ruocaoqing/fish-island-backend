@@ -416,17 +416,14 @@ public class UserController {
     @ApiOperation(value = "更新个人信息")
     @Transactional(rollbackFor = Exception.class) // 添加事务注解
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest) {
-        if (userUpdateMyRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        if (userUpdateMyRequest.getUserName().length() > 10) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名不能超过10个字符");
-        }
-        if (userUpdateMyRequest.getUserProfile().length()>100){
-            throw new BusinessException(ErrorCode.OPERATION_ERROR,"个人信息字符不能超过 100");
-        }
-
+        ThrowUtils.throwIf(userUpdateMyRequest== null, ErrorCode.PARAMS_ERROR);
+        String userName = userUpdateMyRequest.getUserName();
+        ThrowUtils.throwIf(StringUtils.isBlank(userName),  ErrorCode.PARAMS_ERROR, "请输入用户名");
+        ThrowUtils.throwIf(userName.length() > 10, ErrorCode.PARAMS_ERROR, "用户名不能超过10个字符");
+        String userProfile = userUpdateMyRequest.getUserProfile();
+        ThrowUtils.throwIf(StringUtils.isNotBlank(userProfile) && userProfile.length()  > 100,  ErrorCode.PARAMS_ERROR, "个人简介不能超过100个字符");
         User loginUser = userService.getLoginUser();
+        String loginUserUserName = loginUser.getUserName();
 
         // ========== 新增防抖逻辑 ==========
         String debounceKey = RedisKey.getKey(RedisKey.USER_DEBOUNCE_PREFIX, "updateMy", loginUser.getId());
@@ -438,14 +435,18 @@ public class UserController {
 
         // ========== 先执行更新操作，除了用户名 ==========
         User user = new User();
+        //新用户名为空时，设置用户名
+        if (StringUtils.isBlank(loginUserUserName)){
+            user.setUserName(userName);
+        }
         user.setUserAvatar(userUpdateMyRequest.getUserAvatar());
-        user.setUserProfile(userUpdateMyRequest.getUserProfile());
+        user.setUserProfile(userProfile);
         user.setId(loginUser.getId());
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
 
         // ========== 修改后逻辑：仅在更新成功后处理积分 ==========
-        if (!loginUser.getUserName().equals(userUpdateMyRequest.getUserName())) {
+        if (StringUtils.isNotBlank(loginUserUserName) && !userName.equals(loginUserUserName)) {
             String redisKey = RedisKey.getKey(
                     RedisKey.USER_RENAME_LIMIT,
                     loginUser.getId(),
