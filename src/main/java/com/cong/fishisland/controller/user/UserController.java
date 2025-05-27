@@ -424,6 +424,7 @@ public class UserController {
         ThrowUtils.throwIf(StringUtils.isNotBlank(userProfile) && userProfile.length()  > 100,  ErrorCode.PARAMS_ERROR, "个人简介不能超过100个字符");
         User loginUser = userService.getLoginUser();
         String loginUserUserName = loginUser.getUserName();
+        String userRole = loginUser.getUserRole();
 
         // ========== 新增防抖逻辑 ==========
         String debounceKey = RedisKey.getKey(RedisKey.USER_DEBOUNCE_PREFIX, "updateMy", loginUser.getId());
@@ -435,8 +436,8 @@ public class UserController {
 
         // ========== 先执行更新操作，除了用户名 ==========
         User user = new User();
-        //新用户名为空时，设置用户名
-        if (StringUtils.isBlank(loginUserUserName)){
+        //新用户名为空或者是管理员时，设置用户名
+        if (StringUtils.isBlank(loginUserUserName)||UserConstant.ADMIN_ROLE.equals(userRole)){
             user.setUserName(userName);
         }
         user.setUserAvatar(userUpdateMyRequest.getUserAvatar());
@@ -447,7 +448,7 @@ public class UserController {
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         }
         // ========== 修改后逻辑：仅在更新成功后处理积分 ==========
-        if (StringUtils.isNotBlank(loginUserUserName) && !userName.equals(loginUserUserName)) {
+        if (StringUtils.isNotBlank(loginUserUserName) && !userName.equals(loginUserUserName) && UserConstant.DEFAULT_ROLE.equals(userRole)) {
             String redisKey = RedisKey.getKey(
                     RedisKey.USER_RENAME_LIMIT,
                     loginUser.getId(),
