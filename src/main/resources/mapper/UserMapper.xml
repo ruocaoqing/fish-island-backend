@@ -34,12 +34,12 @@
         SELECT
             -- 总用户数
             COUNT(*)                                                          AS totalUsers,
-            -- 今日活跃用户数
-            SUM(CASE WHEN DATE (updateTime) = CURDATE() THEN 1 ELSE 0 END)    AS todayActiveUsers,
             -- 今日新增用户数
             SUM(CASE WHEN DATE (createTime) = CURDATE() THEN 1 ELSE 0 END)    AS todayNewUsers,
-            -- 本月新增用户数
-            SUM(CASE WHEN DATE_FORMAT(createTime, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m') THEN 1 ELSE 0 END) AS thisMonthNewUsers
+            -- 今日活跃用户数
+            SUM(CASE WHEN DATE (updateTime) = CURDATE() THEN 1 ELSE 0 END)    AS todayActiveUsers,
+            -- 本月活跃用户数
+            SUM(CASE WHEN DATE_FORMAT(updateTime, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m') THEN 1 ELSE 0 END) AS thisMonthActiveUsers
         FROM user ${ew.customSqlSegment}
     </select>
     <select id="getNewUserDataWebVOEveryWeek" resultType="com.cong.fishisland.model.vo.user.NewUserDataWebVO">
