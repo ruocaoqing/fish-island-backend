@@ -3,7 +3,7 @@ package com.cong.fishisland.constant;
 /**
  * Redis 密钥
  *
- * @author liuhuaicong
+ * @author cong
  * @date 2023/10/31
  */
 public interface RedisKey {
@@ -60,6 +60,11 @@ public interface RedisKey {
      * 新增防抖相关常量
      */
     String USER_DEBOUNCE_PREFIX = "user:debounce:";
+    
+    /**
+     * 用户禁言 user:mute:{userId}
+     */
+    String USER_MUTE = "user:mute:%d";
 
     static String getKey(String key, Object... objects) {
         return BASE_KEY + String.format(key, objects);
