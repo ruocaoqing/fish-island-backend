@@ -24,8 +24,8 @@ public class UserDataWebVO implements Serializable {
      */
     private Integer todayNewUsers;
     /**
-     * 本月新增用户数
+     * 本月活跃用户数
      */
-    private Integer thisMonthNewUsers;
+    private Integer thisMonthActiveUsers;
     private static final long serialVersionUID = 1L;
 }
