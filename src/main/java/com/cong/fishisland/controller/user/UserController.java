@@ -5,30 +5,40 @@ import com.anji.captcha.model.common.ResponseModel;
 import com.anji.captcha.model.vo.CaptchaVO;
 import com.anji.captcha.service.CaptchaService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.cong.fishisland.annotation.NoRepeatSubmit;
 import com.cong.fishisland.common.BaseResponse;
 import com.cong.fishisland.common.DeleteRequest;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.ResultUtils;
+import com.cong.fishisland.constant.PointConstant;
+import com.cong.fishisland.constant.RedisKey;
 import com.cong.fishisland.constant.UserConstant;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.common.exception.ThrowUtils;
 import com.cong.fishisland.model.dto.user.*;
 import com.cong.fishisland.model.entity.user.User;
-import com.cong.fishisland.model.vo.user.LoginUserVO;
-import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
-import com.cong.fishisland.model.vo.user.UserVO;
+import com.cong.fishisland.model.vo.user.*;
 import com.cong.fishisland.service.UserPointsService;
 import com.cong.fishisland.service.UserService;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.cong.fishisland.utils.RedisUtils;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthCallback;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -403,26 +413,67 @@ public class UserController {
      * @param userUpdateMyRequest 用户更新我请求
      * @return {@link BaseResponse}<{@link Boolean}>
      */
+    @NoRepeatSubmit
     @PostMapping("/update/my")
     @ApiOperation(value = "更新个人信息")
+    @Transactional(rollbackFor = Exception.class) // 添加事务注解
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest) {
-        if (userUpdateMyRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        if (userUpdateMyRequest.getUserName().length() > 10) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名不能超过10个字符");
-        }
-        if (userUpdateMyRequest.getUserProfile().length()>100){
-            throw new BusinessException(ErrorCode.OPERATION_ERROR,"个人信息字符不能超过 100");
-        }
+        ThrowUtils.throwIf(userUpdateMyRequest== null, ErrorCode.PARAMS_ERROR);
+        String userName = userUpdateMyRequest.getUserName();
+        ThrowUtils.throwIf(StringUtils.isBlank(userName),  ErrorCode.PARAMS_ERROR, "请输入用户名");
+        ThrowUtils.throwIf(userName.length() > 10, ErrorCode.PARAMS_ERROR, "用户名不能超过10个字符");
+        String userProfile = userUpdateMyRequest.getUserProfile();
+        ThrowUtils.throwIf(StringUtils.isNotBlank(userProfile) && userProfile.length()  > 100,  ErrorCode.PARAMS_ERROR, "个人简介不能超过100个字符");
         User loginUser = userService.getLoginUser();
+        String loginUserUserName = loginUser.getUserName();
+        String userRole = loginUser.getUserRole();
+        // ========== 先执行更新操作，除了用户名 ==========
         User user = new User();
-        BeanUtils.copyProperties(userUpdateMyRequest, user);
+        //新用户名为空或者是管理员时，设置用户名
+        if (StringUtils.isBlank(loginUserUserName)||UserConstant.ADMIN_ROLE.equals(userRole)){
+            user.setUserName(userName);
+        }
+        user.setUserAvatar(userUpdateMyRequest.getUserAvatar());
+        user.setUserProfile(userProfile);
         user.setId(loginUser.getId());
-        boolean result = userService.updateById(user);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        if (!StringUtils.isAllBlank(user.getUserName(),user.getUserAvatar(), userProfile)){
+            boolean result = userService.updateById(user);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        }
+        // ========== 修改后逻辑：仅在更新成功后处理积分 ==========
+        if (StringUtils.isNotBlank(loginUserUserName) && !userName.equals(loginUserUserName) && UserConstant.DEFAULT_ROLE.equals(userRole)) {
+            String redisKey = RedisKey.getKey(
+                    RedisKey.USER_RENAME_LIMIT,
+                    loginUser.getId(),
+                    LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"))
+            );
+
+            if (RedisUtils.hasKey(redisKey)) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "每月仅可修改一次用户名");
+            }
+            // 修改用户名
+            user.setUserName(userUpdateMyRequest.getUserName());
+            user.setId(loginUser.getId());
+            boolean updated = userService.updateById(user);
+            // 扣除积分（在事务中执行）
+            if (updated){
+                userPointsService.deductPoints(loginUser.getId(), PointConstant.RENAME_POINT);
+            }
+            // 设置限制（事务提交后执行）
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    LocalDateTime endOfMonth = LocalDate.now()
+                            .with(TemporalAdjusters.lastDayOfMonth())
+                            .atTime(23, 59, 59);
+                    Duration duration = Duration.between(LocalDateTime.now(), endOfMonth);
+                    RedisUtils.set(redisKey, "1", duration);
+                }
+            });
+        }
         return ResultUtils.success(true);
     }
+
 
     /**
      * 签到
@@ -433,5 +484,29 @@ public class UserController {
     @ApiOperation(value = "签到")
     public BaseResponse<Boolean> signIn() {
         return ResultUtils.success(userPointsService.signIn());
+    }
+
+
+    /**
+     * 用户数据（仅管理员）
+     * @return 用户数据
+     */
+    @ApiOperation(value = "用户数据（仅管理员）")
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
+    @PostMapping("/get/UserDataWebVO")
+    public BaseResponse<UserDataWebVO> getUserDataWebVO(){
+        return ResultUtils.success(userService.getUserDataWebVO());
+    }
+
+    /**
+     * 新增用户走势图（仅管理员）
+     * @param request 新增用户数据请求
+     * @return 用户新增数据
+     */
+    @ApiOperation(value = "新增用户走势图（仅管理员）")
+    @SaCheckRole(UserConstant.ADMIN_ROLE)
+    @PostMapping("/get/NewUserDataWebVO")
+    public BaseResponse<List<NewUserDataWebVO>> getNewUserDataWebVO(@RequestBody NewUserDataWebRequest request){
+        return ResultUtils.success(userService.getNewUserDataWebVO(request));
     }
 }

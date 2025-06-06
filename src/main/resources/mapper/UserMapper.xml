@@ -30,5 +30,129 @@
         userName,userAvatar,userProfile,userRole,createTime,
         updateTime,isDelete
     </sql>
+    <select id="getUserDataWebVO" resultType="com.cong.fishisland.model.vo.user.UserDataWebVO">
+        SELECT
+            -- 总用户数
+            COUNT(*)                                                          AS totalUsers,
+            -- 今日新增用户数
+            SUM(CASE WHEN DATE (createTime) = CURDATE() THEN 1 ELSE 0 END)    AS todayNewUsers,
+            -- 今日活跃用户数
+            SUM(CASE WHEN DATE (updateTime) = CURDATE() THEN 1 ELSE 0 END)    AS todayActiveUsers,
+            -- 本月活跃用户数
+            SUM(CASE WHEN DATE_FORMAT(updateTime, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m') THEN 1 ELSE 0 END) AS thisMonthActiveUsers
+        FROM user ${ew.customSqlSegment}
+    </select>
+    <select id="getNewUserDataWebVOEveryWeek" resultType="com.cong.fishisland.model.vo.user.NewUserDataWebVO">
+        SELECT
+            DATE_FORMAT(d.date, '%m-%d') AS date,
+            COALESCE(COUNT(u.id), 0) AS newUserCount
+        FROM (
+                 SELECT
+                     DATE_ADD(
+                             DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY),
+                             INTERVAL n.n DAY
+                     ) AS date
+                 FROM
+                     (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) n
+             ) d
+                 LEFT JOIN
+             user u ON DATE_FORMAT(u.createTime, '%Y-%m-%d') = DATE_FORMAT(d.date, '%Y-%m-%d')
+                 AND u.isDelete = 0
+        GROUP BY
+            d.date
+        ORDER BY
+            d.date;
+    </select>
+    <select id="getNewUserDataWebVOEveryMonth" resultType="com.cong.fishisland.model.vo.user.NewUserDataWebVO">
+        SELECT
+            DATE_FORMAT(d.date, '%m-%d') AS date,
+            COALESCE(COUNT(u.id), 0) AS newUserCount
+        FROM (
+                 SELECT
+                     DATE_ADD(
+                             DATE_FORMAT(CURDATE(), '%Y-%m-01'),
+                             INTERVAL n.n DAY
+                     ) AS date
+                 FROM
+                     (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
+                      UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+                      UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15
+                      UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL SELECT 20
+                      UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24 UNION ALL SELECT 25
+                      UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29 UNION ALL SELECT 30) n
+                 WHERE
+                     DATE_ADD(
+                             DATE_FORMAT(CURDATE(), '%Y-%m-01'),
+                             INTERVAL n.n DAY
+                     ) &lt;= LAST_DAY(CURDATE())
+             ) d
+                 LEFT JOIN
+             user u ON DATE_FORMAT(u.createTime, '%Y-%m-%d') = DATE_FORMAT(d.date, '%Y-%m-%d')
+                 AND u.isDelete = 0
+        GROUP BY
+            d.date
+        ORDER BY
+            d.date;
+    </select>
+    <select id="getNewUserDataWebVOEveryYear" resultType="com.cong.fishisland.model.vo.user.NewUserDataWebVO">
+        SELECT
+            DATE_FORMAT(d.date, '%Y-%m') AS date,
+            COALESCE(COUNT(u.id), 0) AS newUserCount
+        FROM (
+                 SELECT
+                     DATE_ADD(
+                             DATE_SUB(CURDATE(), INTERVAL MONTH(CURDATE()) - 1 MONTH),
+                             INTERVAL (n.n) MONTH
+                     ) AS date
+                 FROM
+                     (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
+                      UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+                      UNION ALL SELECT 11) n
+                 WHERE
+                     DATE_ADD(
+                             DATE_SUB(CURDATE(), INTERVAL MONTH(CURDATE()) - 1 MONTH),
+                             INTERVAL (n.n) MONTH
+                     ) &lt;= DATE_ADD(LAST_DAY(CURDATE()), INTERVAL 1 YEAR)
+             ) d
+                 LEFT JOIN
+             user u ON DATE_FORMAT(DATE(u.createTime), '%Y-%m') = DATE_FORMAT(d.date, '%Y-%m')
+                 AND u.isDelete = 0
+        GROUP BY
+            d.date
+        ORDER BY
+            d.date;
+    </select>
+    <select id="getNewUserDataWebVOByTime" resultType="com.cong.fishisland.model.vo.user.NewUserDataWebVO">
+        SELECT
+            DATE_FORMAT(d.date, '%m-%d') AS date,
+            COALESCE(COUNT(u.id), 0) AS newUserCount
+        FROM
+            (SELECT
+                 DATE_ADD(
+                         #{beginTime},
+                         INTERVAL n.n DAY
+                 ) AS date
+             FROM
+                 (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
+                  UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+                  UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15
+                  UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL SELECT 20
+                  UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24 UNION ALL SELECT 25
+                  UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29 UNION ALL SELECT 30
+                  UNION ALL SELECT 31) n
+             WHERE
+                 DATE_ADD(
+                         #{beginTime},
+                         INTERVAL n.n DAY
+                 ) &lt;= #{endTime}
+            ) d
+                LEFT JOIN
+            user u ON DATE_FORMAT(u.createTime, '%Y-%m-%d') = DATE_FORMAT(d.date, '%Y-%m-%d')
+                AND u.isDelete = 0
+        GROUP BY
+            d.date
+        ORDER BY
+            d.date;
+    </select>
 </mapper>
 

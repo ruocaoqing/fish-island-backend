@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cong.fishisland.common.ErrorCode;
 import com.cong.fishisland.common.exception.BusinessException;
 import com.cong.fishisland.common.exception.ThrowUtils;
+import com.cong.fishisland.mapper.emoticon.EmoticonFavourMapper;
 import com.cong.fishisland.model.entity.emoticon.EmoticonFavour;
 import com.cong.fishisland.model.entity.user.User;
 import com.cong.fishisland.service.EmoticonFavourService;
-import com.cong.fishisland.mapper.emoticon.EmoticonFavourMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
@@ -41,14 +41,11 @@ public class EmoticonFavourServiceImpl extends ServiceImpl<EmoticonFavourMapper,
         Long userId = loginUser.getId();
         // 判断是否已收藏
         boolean existed = existEmoticonFavour(emoticonSrc, userId);
-        if (existed){
+        if (existed) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "该表情包已收藏过");
         }
-        // 每个用户串行收藏
         EmoticonFavourService emoticonFavourService = (EmoticonFavourService) AopContext.currentProxy();
-        synchronized (String.valueOf(userId).intern()) {
-            return emoticonFavourService.addEmoticonFavourInner(emoticonSrc, userId);
-        }
+        return emoticonFavourService.addEmoticonFavourInner(emoticonSrc, userId);
     }
 
     /**

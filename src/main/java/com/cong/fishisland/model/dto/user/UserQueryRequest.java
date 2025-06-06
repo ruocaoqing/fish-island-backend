@@ -47,5 +47,15 @@ public class UserQueryRequest extends PageRequest implements Serializable {
      */
     private String userRole;
 
+    /**
+     * 创建时间范围
+     */
+    private String[] createTimeRange;
+
+    /**
+     * 更新时间范围
+     */
+    private String[] updateTimeRange;
+
     private static final long serialVersionUID = 1L;
 }

@@ -2,15 +2,14 @@ package com.cong.fishisland.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.cong.fishisland.model.dto.user.NewUserDataWebRequest;
 import com.cong.fishisland.model.dto.user.UserQueryRequest;
 import com.cong.fishisland.model.entity.user.User;
-import com.cong.fishisland.model.vo.user.LoginUserVO;
-import com.cong.fishisland.model.vo.user.TokenLoginUserVo;
-import com.cong.fishisland.model.vo.user.UserVO;
-import me.zhyd.oauth.model.AuthCallback;
+import com.cong.fishisland.model.vo.user.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+
+import me.zhyd.oauth.model.AuthCallback;
 
 /**
  * 用户服务
@@ -44,7 +43,7 @@ public interface UserService extends IService<User> {
      * @param email 邮箱
      * @return 验证码
      */
-    boolean userEmailSend(String email, HttpServletRequest request);
+    boolean userEmailSend(String email);
 
     /**
      * 用户登录
@@ -163,4 +162,18 @@ public interface UserService extends IService<User> {
      * @return {@link TokenLoginUserVo }
      */
     TokenLoginUserVo userLoginByGithub(AuthCallback callback);
+
+    /**
+     * 用户数据
+     *
+     * @return {@link UserDataWebVO}
+     */
+    UserDataWebVO getUserDataWebVO();
+
+    /**
+     * 新用户数据
+     *
+     * @return {@link NewUserDataWebVO}
+     */
+    List<NewUserDataWebVO> getNewUserDataWebVO(NewUserDataWebRequest request);
 }
