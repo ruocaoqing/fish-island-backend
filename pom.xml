@@ -196,13 +196,6 @@
             <artifactId>okhttp</artifactId>
             <version>4.9.3</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.microsoft.playwright</groupId>
-            <artifactId>playwright</artifactId>
-            <version>1.44.0</version> <!-- 建议使用最新版 -->
-        </dependency>
-
     </dependencies>
 
     <build>
