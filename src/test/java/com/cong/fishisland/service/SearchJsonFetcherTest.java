@@ -1,6 +1,7 @@
 package com.cong.fishisland.service;
 
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -9,10 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class BilibiliSearchTest  extends TestBaseByLogin {
+class SearchJsonFetcherTest extends TestBaseByLogin {
 
     @Test
-    void bilibiliSearchTest()  {
+    void bilibiliSearchTest() {
 
         // 1. 获取网页
         String bilibiliURL = "https://api.bilibili.com/x/web-interface/popular";
@@ -41,6 +42,29 @@ public class BilibiliSearchTest  extends TestBaseByLogin {
             // 打印结果
             log.info("\n标题：{}，\n封面：{}，\n介绍：{}，\n跳转链接：{},\n收藏数：{},\n观看数：{}",
                     title, pic, desc, shortLinkV2, favorite, view);
+        });
+    }
+
+    @Test
+    void tiebaSearchTest() {
+
+        String tiebaHotUrl = "https://tieba.baidu.com/hottopic/browse/topicList";
+
+        String result = HttpUtil.get(tiebaHotUrl);
+
+        JSONObject resultJson = JSON.parseObject(result);
+        JSONObject data = resultJson.getJSONObject("data");
+        JSONObject bangTopic = data.getJSONObject("bang_topic");
+        JSONArray topicList = bangTopic.getJSONArray("topic_list");
+
+        topicList.forEach(item -> {
+            JSONObject jsonItem = (JSONObject) item;
+            String title = jsonItem.getString("topic_name");
+            String url = jsonItem.getString("topic_url");
+            String followerCount = jsonItem.getString("discuss_num");
+
+            System.out.println("标题：" + title + "url: " + url + "followerCount:" + followerCount);
+
         });
     }
 
