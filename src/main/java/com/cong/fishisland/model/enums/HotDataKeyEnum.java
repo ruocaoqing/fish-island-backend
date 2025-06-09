@@ -26,7 +26,8 @@ public enum HotDataKeyEnum {
     CS_DN("csdn", "CSDN"),
     JUE_JIN("掘金", "JueJin"),
     SM_ZDM("什么值得买", "SmZdm"),
-    ZHI_BO_8("直播吧", "ZhiBo8");
+    ZHI_BO_8("直播吧", "ZhiBo8"),
+    TIE_BA("贴吧", "TieBa"),;
 
 
     private final String text;
