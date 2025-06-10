@@ -33,7 +33,8 @@ public class DataSourceRegistry {
     private final JueJinDataSource jueJinDataSource;
     private final SmzdmDataSource smzdmDataSource;
     private final ZhiBo8DataSource zhiBo8DataSource;
-    private final QQMusicDataSource qqMusicDataSource;
+    private final TieBaDataSource tieBaDataSource;
+
 
     @PostConstruct
     public void doInit() {
@@ -49,7 +50,7 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.JUE_JIN.getValue(), jueJinDataSource);
             put(HotDataKeyEnum.SM_ZDM.getValue(), smzdmDataSource);
             put(HotDataKeyEnum.ZHI_BO_8.getValue(), zhiBo8DataSource);
-            put(HotDataKeyEnum.QQ_MUSIC.getValue(), qqMusicDataSource);
+            put(HotDataKeyEnum.TIE_BA.getValue(), tieBaDataSource);
         }};
     }
 
