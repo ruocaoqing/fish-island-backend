@@ -60,7 +60,7 @@ public class QQMusicDataSource implements DataSource {
                 .category(CategoryTypeEnum.MUSIC_HOT.getValue())
                 .name("QQ音乐热歌榜")
                 .updateInterval(UpdateIntervalEnum.TWO_HOUR.getValue())
-                .iconUrl("https://api.oss.cqbo.com/moyu/user_avatar/1922893849325314049/ciGXlg1M-logo.png")
+                .iconUrl("https://s1.aigei.com/src/img/png/5d/5d7d335b9cab49e39236418edf31ed1f.png?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:lwKuad6Nw3hxdwVBE-_6NeCuqf0=")
                 .hostJson(JSON.toJSONString(hotPostDataVos.subList(0, Math.min(hotPostDataVos.size(), 20))))
                 .typeName("QQ音乐")
                 .build();
