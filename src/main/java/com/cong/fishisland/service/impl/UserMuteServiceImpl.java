@@ -84,13 +84,15 @@ public class UserMuteServiceImpl implements UserMuteService {
             String muteKey = RedisKey.getKey(RedisKey.USER_MUTE, userId);
             // 检查是否存在禁言记录
             if (!RedisUtils.hasKey(muteKey)) {
-                return vo; // 用户未被禁言
+                // 用户未被禁言
+                return vo;
             }
 
             // 获取禁言结束时间
             String endTimeStr = RedisUtils.get(muteKey);
             if (endTimeStr == null || endTimeStr.isEmpty()) {
-                return vo; // 禁言已结束
+                // 禁言已结束
+                return vo;
             }
 
             long endTime = Long.parseLong(endTimeStr);

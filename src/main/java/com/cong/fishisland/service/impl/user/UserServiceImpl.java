@@ -249,16 +249,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 校验邮箱格式
         validateEmailFormat(email);
         // 获取客户端 IP
-        String clientIP = ServletUtil.getClientIP(request);
+        String clientIp = ServletUtil.getClientIP(request);
         // IP 黑名单检查
         boolean ipBanned = emailBanService.lambdaQuery()
-                .eq(EmailBan::getBannedIp, clientIP)
+                .eq(EmailBan::getBannedIp, clientIp)
                 .exists();
         if (ipBanned) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "您的 IP 已被封禁，暂时无法发送验证码");
         }
         // IP 限流 & 日志告警
-        String ipKey = IP_COUNT_PREFIX + clientIP;
+        String ipKey = IP_COUNT_PREFIX + clientIp;
         Long ipCount = stringRedisTemplate.opsForValue().increment(ipKey);
         if (ipCount != null) {
             if (ipCount == 1) {
@@ -268,7 +268,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (ipCount > IP_THRESHOLD) {
                 // 超出阈值，记录警告日志
                 log.warn("频繁请求警告：来自 IP [{}] 在 {} 分钟内已请求 {} 次",
-                        clientIP, IP_WINDOW.toMinutes(), ipCount);
+                        clientIp, IP_WINDOW.toMinutes(), ipCount);
             }
         }
 

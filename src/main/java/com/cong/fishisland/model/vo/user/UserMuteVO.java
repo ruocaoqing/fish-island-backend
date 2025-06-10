@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @author cong
  */
 @Data
-@ApiModel(value = "用户禁言信息")
+//@ApiModel(value = "用户禁言信息")
 public class UserMuteVO implements Serializable {
 
     private static final long serialVersionUID = 1L;

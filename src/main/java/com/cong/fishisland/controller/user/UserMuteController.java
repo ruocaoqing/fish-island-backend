@@ -24,7 +24,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/user/mute")
 @Slf4j
-@Api(tags = "用户禁言相关")
+//@Api(tags = "用户禁言相关")
 public class UserMuteController {
 
     @Resource

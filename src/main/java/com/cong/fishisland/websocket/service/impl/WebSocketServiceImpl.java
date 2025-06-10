@@ -229,7 +229,7 @@ public class WebSocketServiceImpl implements WebSocketService {
                 Message message = messageDto.getMessage();
                 String resultContent = fixMessage(message);
                 message.setContent(resultContent);
-                UserMuteVO userMuteInfo = userMuteService.getUserMuteInfo(Long.valueOf(message.getSender().getId()));
+                UserMuteVO userMuteInfo = userMuteService.getUserMuteInfo(loginUserId);
                 if (userMuteInfo.getIsMuted()){
                     //用户被禁言
                     // 异常返回
