@@ -1,76 +1,81 @@
 package com.cong.fishisland.datasource.hostpost;
 
+import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.cong.fishisland.model.entity.hot.HotPost;
 import com.cong.fishisland.model.enums.CategoryTypeEnum;
 import com.cong.fishisland.model.enums.UpdateIntervalEnum;
 import com.cong.fishisland.model.vo.hot.HotPostDataVO;
-import com.microsoft.playwright.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Slf4j
 public class QQMusicDataSource implements DataSource {
+
+    private static final String QQ_MUSIC_URL = "https://y.qq.com/n/ryqq/toplist/26";
+    private static final String USER_AGENT = "Mozilla/5.0(Windows NT 10.0;Win64;x64;rv:66.0)Gecko/20100101 Firefox/66.0";
+    String QQ_MUSIC_URL_ = "https://y.qq.com/n/ryqq/toplist/26";
+
+    String data = "{\"detail\":{\"module\":\"musicToplist.ToplistInfoServer\",\"method\":\"GetDetail\",\"param\":{\"topId\":26,\"offset\":0,\"num\":20,\"period\":\"20250606\"}}}";
+
+
+    private static final String musicDetailUrl = "https://y.qq.com/n/ryqq/songDetail/";
 
 
     //提交
     @Override
     public HotPost getHotPost() {
 
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(
-                    new BrowserType.LaunchOptions().setHeadless(true)
-            );
+        //调用接口 https://u.y.qq.com/cgi-bin/musicu.fcg?data=，GET请求，最终获取到json格式的字符串数据，需要传data,data为json格式的字符串，生成一下以下代码
+        String jsonData = "{\n" +
+                "        \"detail\": {\n" +
+                "            \"module\": \"musicToplist.ToplistInfoServer\",\n" +
+                "                    \"method\": \"GetDetail\",\n" +
+                "                    \"param\": {\n" +
+                "                \"topId\": 26,\n" +
+                "                        \"offset\": 0,\n" +
+                "                        \"num\": 20,\n" +
+                "                        \"period\": \"20250606\"\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }";
+        //发送请求
+        String response = HttpUtil.get("https://u.y.qq.com/cgi-bin/musicu.fcg?data=" + jsonData);
+        log.info("获取数据成功：{}", response);
 
-            // 创建浏览器上下文，并设置 userAgent
-            BrowserContext context = browser.newContext(new Browser.NewContextOptions()
-                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
-            );
+        JSONObject jsonObject = JSON.parseObject(response);
 
-            Page page = context.newPage();
+        System.out.println(jsonObject);
 
-            String url = "https://y.qq.com/n/ryqq/toplist/26";
-            page.navigate(url);
+        JSONArray jsonArray = jsonObject.getJSONObject("detail").getJSONObject("data").getJSONObject("data").getJSONArray("song");
 
-            // 等待页面加载一段时间（或你可以使用 waitForSelector 替代）
-
-            page.waitForSelector(".songlist__list", new Page.WaitForSelectorOptions().setTimeout(8000));
-
-            String html = page.content();
-            System.out.println(html);
-            browser.close();
-
-            Document document = Jsoup.parse(html);
-
-            Elements songlist__cover = document.getElementsByClass("songlist__cover");
-
-            int count = 1;
-
-            List<HotPostDataVO> dataList = new ArrayList<>();
-            for (Element item : songlist__cover) {
-                HotPostDataVO vo = HotPostDataVO.builder().title(item.attr("title")).url(url + item.attr("href")).followerCount(count++).build();
-                dataList.add(vo);
-            }
-
-            return HotPost.builder()
-                    .sort(CategoryTypeEnum.MUSIC_HOT.getValue())
-                    .category(CategoryTypeEnum.MUSIC_HOT.getValue())
-                    .name("QQ音乐热歌榜")
-                    .updateInterval(UpdateIntervalEnum.TWO_HOUR.getValue())
-                    .iconUrl("https://api.oss.cqbo.com/moyu/user_avatar/1922893849325314049/ciGXlg1M-logo.png")
-                    .hostJson(JSON.toJSONString(dataList.subList(0, Math.min(dataList.size(), 20))))
-                    .typeName("QQ音乐")
-                    .build();
-
-
+        List<HotPostDataVO> hotPostDataVOS = new ArrayList<>();
+        // 3. 遍历数组，提取 title 和 songId
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject song = jsonArray.getJSONObject(i);
+            String title = song.getString("title");
+            long songId = song.getLongValue("songId"); // 或 getLong("songId")
+            Integer rank = song.getInteger("rank");
+            hotPostDataVOS.add(HotPostDataVO.builder().title(title).url(musicDetailUrl + songId).followerCount(rank).build());
         }
+
+        return HotPost.builder()
+                .sort(CategoryTypeEnum.MUSIC_HOT.getValue())
+                .category(CategoryTypeEnum.MUSIC_HOT.getValue())
+                .name("QQ音乐热歌榜")
+                .updateInterval(UpdateIntervalEnum.TWO_HOUR.getValue())
+                .iconUrl("https://api.oss.cqbo.com/moyu/user_avatar/1922893849325314049/ciGXlg1M-logo.png")
+                .hostJson(JSON.toJSONString(hotPostDataVOS.subList(0, Math.min(hotPostDataVOS.size(), 20))))
+                .typeName("QQ音乐")
+                .build();
+
     }
+
 }
 
