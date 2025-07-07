@@ -31,7 +31,8 @@ public enum HotDataKeyEnum {
     PENG_PAI("澎湃", "thepaper"),
     TOU_TIAO("今日头条", "toutiao"),
     THREE_SIX("36K", "36kr"),
-    QQ_MUSIC("QQ音乐", "QQMusic");
+    QQ_MUSIC("QQ音乐", "QQMusic"),
+    BAI_DU("百度", "baidu");
 
 
     private final String text;

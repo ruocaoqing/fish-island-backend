@@ -38,6 +38,7 @@ public class DataSourceRegistry {
     private final PengPaiDataSource pengPaiDataSource;
     private final TouTiaoDataSource touTiaoDataSource;
     private final ThreeSixDataSource threeSixDataSource;
+    private final BaiduDataSource baiduDataSource;
 
 
     @PostConstruct
@@ -59,6 +60,8 @@ public class DataSourceRegistry {
             put(HotDataKeyEnum.QQ_MUSIC.getValue(), qqMusicDataSource);
             put(HotDataKeyEnum.TOU_TIAO.getValue(), touTiaoDataSource);
             put(HotDataKeyEnum.THREE_SIX.getValue(), threeSixDataSource);
+            put(HotDataKeyEnum.THREE_SIX.getValue(), threeSixDataSource);
+            put(HotDataKeyEnum.BAI_DU.getValue(), baiduDataSource);
         }};
     }
 
