@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 热榜数据接口
@@ -31,6 +32,16 @@ public class HotPostController {
     @ApiOperation(value = "获取列表（封装类）")
     public BaseResponse<List<HotPostVO>> getHotPostList() {
         return ResultUtils.success(hotPostService.getHotPostList());
+    }
+    /**
+     * 获取列表（封装类）
+     */
+    @GetMapping("/list/{type}")
+    @ApiOperation(value = "获取列表（封装类）")
+    public BaseResponse<HotPostVO> getHotPostList(@PathVariable String type) {
+        List<HotPostVO> hotPostList = hotPostService.getHotPostList();
+        HotPostVO hotPostVO = hotPostList.stream().filter(hotPost -> hotPost.getType().equals(type)).findFirst().orElse( null);
+        return ResultUtils.success(hotPostVO);
     }
 
 
