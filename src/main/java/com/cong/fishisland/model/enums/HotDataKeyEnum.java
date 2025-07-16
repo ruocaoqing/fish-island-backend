@@ -32,6 +32,7 @@ public enum HotDataKeyEnum {
     TOU_TIAO("今日头条", "toutiao"),
     THREE_SIX("36K", "36kr"),
     QQ_MUSIC("QQ音乐", "QQMusic"),
+    BAI_DU("百度", "baidu"),
     SSPAI("少数派", "sspai"),
     QUARK("夸克", "quark");
 
